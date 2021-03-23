@@ -1,1 +1,2 @@
-# bsc-contracts
+# bStable's contracts on BSC
+
