@@ -1,19 +1,19 @@
 pragma solidity ^0.6.0;
 
-import "./BEP20.sol";
-import "./interfaces/IBStableToken.sol";
+import "../BEP20.sol";
+import "../interfaces/IBStableToken.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-///@title BStable DAO Token
-///@dev All data's decimal is 18.
-contract BStableToken is IBStableToken, BEP20, Ownable {
+// BStable DAO Token
+// All data's decimal is 18.
+contract BStableTokenForTestDEV is IBStableToken, BEP20, Ownable {
     using SafeMath for uint256;
     address minter;
 
-    uint256 YEAR = uint256(86400).mul(365);
-    uint256 INITIAL_SUPPLY = uint256(3_000_000).mul(10**18);
-    uint256 INITIAL_RATE = uint256(30_866_095).mul(10**18).div(YEAR);
-    uint256 RATE_REDUCTION_TIME = YEAR;
+    uint256 HOUR = uint256(3600);
+    uint256 INITIAL_SUPPLY = uint256(300).mul(10**18);
+    uint256 INITIAL_RATE = uint256(3_087).mul(10**18).div(HOUR);
+    uint256 RATE_REDUCTION_TIME = HOUR;
     uint256 RATE_REDUCTION_COEFFICIENT = 1189207115002721024;
     uint256 INFLATION_DELAY = 86400;
 
@@ -27,16 +27,13 @@ contract BStableToken is IBStableToken, BEP20, Ownable {
 
     event SetMinter(address minter);
 
-    constructor(
-        string memory _name,
-        string memory _symbol,
-        address ownerAddress
-    ) public BEP20(_name, _symbol) {
-        transferOwnership(ownerAddress);
+    constructor(string memory _name, string memory _symbol)
+        public
+        BEP20(_name, _symbol)
+    {
+        transferOwnership(msg.sender);
         _mint(msg.sender, INITIAL_SUPPLY);
-        start_epoch_time = block.timestamp.add(INFLATION_DELAY).sub(
-            RATE_REDUCTION_TIME
-        );
+        start_epoch_time = block.timestamp.sub(RATE_REDUCTION_TIME);
         mining_epoch = -1;
         rate = 0;
         start_epoch_supply = INITIAL_SUPPLY;

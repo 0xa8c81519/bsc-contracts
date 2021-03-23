@@ -1,7 +1,7 @@
 {
-    "name": "option-protocol",
+    "name": "bsc-contracts",
     "version": "1.0.0",
-    "description": "Ploutoz's option protocol",
+    "description": "",
     "main": "index.js",
     "scripts": {
         "k:test:oracle": "truffle test test/oracle.test.ts --network kovan_oracle",
@@ -14,7 +14,7 @@
         "k:test:exercise": "truffle test test/exercise.test.ts --network kovan_skipMigrations",
         "t:compile": "truffle compile && typechain --target=truffle --outDir build/types/truffle-types \"build/contracts/*.json\"",
         "t:migrate": "truffle migrate",
-        "g:start": "ganache-cli --deterministic",
+        "g:start": "ganache-cli --deterministic --networkId=5777 --gasLimit=0x2810eb7c --mnemonic='pony human hospital penalty woman delay autumn else room kind inject already'",
         "o:compile": "oz compile --solc-version=0.6.6 --optimizer on",
         "t:flattener": "truffle-flattener"
     },
@@ -42,6 +42,7 @@
         "eslint-plugin-import": "^2.18.2",
         "eslint-plugin-prettier": "^3.1.1",
         "ganache-cli": "^6.10.1",
+        "husky": "^4.3.8",
         "mocha": "^8.1.1",
         "truffle": "^5.1.37",
         "truffle-assertions": "^0.9.2",
