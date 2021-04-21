@@ -1,7 +1,8 @@
 const BStablePool = artifacts.require("BStablePool");
 const StableCoin = artifacts.require("StableCoin");
 const BStableProxyV2 = artifacts.require("BStableProxyV2");
-const BStableTokenV2 = artifacts.require("BStableTokenV2");
+const PaymentToken = artifacts.require("PaymentToken");
+const BStablePayment = artifacts.require("BStablePayment");
 const config = {
     // owner: '',
     // dev: ''
@@ -40,8 +41,10 @@ module.exports = async function (deployer, network, accounts) {
         let btcbAddress;
         let renBtcAddress;
         let anyBtcAddress;
+        let usdcAddress;
         let p1Address;
         let p2Address;
+        let p3Address;
         deployer.then(() => {
             let totalSupply = web3.utils.toWei('100000000', 'ether');
             return StableCoin.new("tDAI for BStable test", "tDAI", totalSupply);
@@ -56,7 +59,7 @@ module.exports = async function (deployer, network, accounts) {
         }).then(usdt => {
             usdtAddress = usdt.address;
             let stableCoins = [daiAddress, busdAddress, usdtAddress];
-            let A = 200;
+            let A = 1000;
             let fee = '10000000';
             let adminFee = '5000000000';
             return BStablePool.new("BStable Pool (tDAI/tUSD/tUSDT) for test", "BSLP-01", stableCoins, A, fee, adminFee, owner);
@@ -75,12 +78,34 @@ module.exports = async function (deployer, network, accounts) {
         }).then(anyBtc => {
             anyBtcAddress = anyBtc.address;
             let stableCoins = [btcbAddress, renBtcAddress, anyBtcAddress];
-            let A = 200;
+            let A = 1000;
             let fee = '10000000';
             let adminFee = '5000000000';
             return BStablePool.new("BStable Pool (aBTC/bBTC/cBTC) for test", "BSLP-02", stableCoins, A, fee, adminFee, owner);
-        }).then(async pool => {
+        }).then(pool => {
             p2Address = pool.address;
+            let totalSupply = web3.utils.toWei('100000000', 'ether');
+            return StableCoin.new("tUSDC for BStable test", "tUSDC", totalSupply)
+        }).then(tUSDC => {
+            usdcAddress = tUSDC.address;
+            let stableCoins = [usdcAddress, busdAddress, usdtAddress];
+            let A = 1000;
+            let fee = '10000000';
+            let adminFee = '5000000000';
+            return BStablePool.new("BStable Pool (tUSDC/tBUSD/tUSDT) for test", "BSLP-03", stableCoins, A, fee, adminFee, owner);
+        }).then(async pool => {
+            p3Address = pool.address;
+            let paymentTokenInstance = await PaymentToken.new("BStable Payment Token", "BSPT", owner);
+            let paymentConstractInstance = await BStablePayment.new("BStable Payment Contract", "BPC-V1-Beta", owner);
+            await paymentTokenInstance.setMinter(paymentConstractInstance.address);
+            await paymentConstractInstance.addCoins(usdcAddress, 0);
+            await paymentConstractInstance.addCoins(busdAddress, 1);
+            await paymentConstractInstance.addCoins(usdtAddress, 2);
+            await paymentConstractInstance.setPool(p3Address);
+            console.log('Payment token: ' + paymentTokenInstance.address);
+            console.log('Payment Contract: ' + paymentConstractInstance.address);
+            return paymentTokenInstance;
+        }).then(async paymentToken => {
             let latestBlock = await web3.eth.getBlock('latest');
             let tokenPerBlock = web3.utils.toWei('2', 'ether');
             let startBlock = latestBlock.number + 60 / 3 * 60 * 24; // farming will start after 24h
@@ -92,8 +117,10 @@ module.exports = async function (deployer, network, accounts) {
             let bstAddress = await proxy.getTokenAddress();
             console.log("Token's address: " + bstAddress);
             console.log("Proxy's address: " + proxy.address);
-            await proxy.add(6, p1Address, false);
-            await proxy.add(4, p2Address, false);
+            await proxy.add(3, p1Address, false);
+            await proxy.add(2, p2Address, false);
+            await proxy.add(4, p3Address, false);
+            await proxy.add(1, paymentToken.address, false);
         });
     } else {
 
