@@ -15,7 +15,7 @@ const stableCoinContract: StableCoinContract = artifacts.require('StableCoin.sol
 const tokenContract: BStableTokenForTestDEVContract = artifacts.require('BStableTokenForTestDEV.sol');
 const poolContract: BStablePoolContract = artifacts.require('BStablePool.sol');
 import { BigNumber } from 'bignumber.js';
-import { config } from './config'
+import { config } from './config';
 
 contract('BStable proxy', async accounts => {
 

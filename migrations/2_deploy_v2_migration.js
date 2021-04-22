@@ -102,8 +102,9 @@ module.exports = async function (deployer, network, accounts) {
             await paymentConstractInstance.addCoins(busdAddress, 1);
             await paymentConstractInstance.addCoins(usdtAddress, 2);
             await paymentConstractInstance.setPool(p3Address);
-            console.log('Payment token: ' + paymentTokenInstance.address);
+            // console.log('Payment token: ' + paymentTokenInstance.address);
             console.log('Payment Contract: ' + paymentConstractInstance.address);
+            await paymentConstractInstance.setPaymentToken(paymentTokenInstance.address);
             return paymentTokenInstance;
         }).then(async paymentToken => {
             let latestBlock = await web3.eth.getBlock('latest');
@@ -115,7 +116,7 @@ module.exports = async function (deployer, network, accounts) {
             let proxy = await BStableProxyV2.new(dev, tokenPerBlock, startBlock, bonusEndBlock, owner);
             // await proxy.createWallet();
             let bstAddress = await proxy.getTokenAddress();
-            console.log("Token's address: " + bstAddress);
+            // console.log("Token's address: " + bstAddress);
             console.log("Proxy's address: " + proxy.address);
             await proxy.add(3, p1Address, false);
             await proxy.add(2, p2Address, false);

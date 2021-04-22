@@ -13,16 +13,16 @@ import "./lib/TransferHelper.sol";
 contract BStablePayment is BEP20, Ownable {
     using SafeMath for uint256;
 
-    IPaymentToken paymentToken;
+    IPaymentToken public paymentToken;
 
-    IBStablePool pool;
+    IBStablePool public pool;
 
     struct CoinInfo {
         uint256 index;
         bool available;
     }
 
-    mapping(address => CoinInfo) coins;
+    mapping(address => CoinInfo) public coins;
 
     event Pay(
         address payToken,
@@ -104,6 +104,7 @@ contract BStablePayment is BEP20, Ownable {
             msg.sender,
             returnAmt.sub(receiptAmt)
         );
+        paymentToken.mintTo(msg.sender, 1_000_000_000_000_000_000);
         emit Pay(payToken, receiptToken, msg.sender, receipt);
     }
 }
