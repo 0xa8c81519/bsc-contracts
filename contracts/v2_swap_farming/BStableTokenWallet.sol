@@ -1,8 +1,8 @@
 pragma solidity ^0.6.0;
 
-import "./BEP20.sol";
+import "../BEP20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "./lib/TransferHelper.sol";
+import "../lib/TransferHelper.sol";
 
 ///@title BStable DAO Token Wallet
 ///@dev All data's decimal is 18.
