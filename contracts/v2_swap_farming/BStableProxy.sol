@@ -1,15 +1,15 @@
 pragma solidity ^0.6.0;
 
-import "./BEP20.sol";
+import "../BEP20.sol";
 import "./BStableTokenWallet.sol";
-import "./interfaces/IBEP20.sol";
-import "./interfaces/IBStablePool.sol";
-import "./interfaces/IBStableProxy.sol";
-import "./interfaces/IBStableToken.sol";
+import "../interfaces/IBEP20.sol";
+import "../interfaces/IBStablePool.sol";
+import "../interfaces/IBStableProxy.sol";
+import "../interfaces/IBStableToken.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
-import "./lib/TransferHelper.sol";
+import "../lib/TransferHelper.sol";
 
 // Proxy
 contract BStableProxy is IBStableProxy, BEP20, Ownable, ReentrancyGuard {

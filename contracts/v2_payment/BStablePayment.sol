@@ -2,13 +2,13 @@
 
 pragma solidity ^0.6.0;
 
-import "./interfaces/IBEP20.sol";
-import "./interfaces/IPaymentToken.sol";
-import "./interfaces/IBStablePool.sol";
+import "../interfaces/IBEP20.sol";
+import "../interfaces/IPaymentToken.sol";
+import "../interfaces/IBStablePool.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "./BEP20.sol";
-import "./lib/TransferHelper.sol";
+import "../BEP20.sol";
+import "../lib/TransferHelper.sol";
 
 contract BStablePayment is BEP20, Ownable {
     using SafeMath for uint256;

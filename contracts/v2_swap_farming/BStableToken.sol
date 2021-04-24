@@ -1,7 +1,7 @@
 pragma solidity ^0.6.0;
 
-import "./BEP20.sol";
-import "./interfaces/IBStableToken.sol";
+import "../BEP20.sol";
+import "../interfaces/IBStableToken.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 ///@title BStable DAO Token

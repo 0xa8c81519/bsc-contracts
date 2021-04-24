@@ -2,9 +2,9 @@ pragma solidity ^0.6.0;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
-import "./lib/TransferHelper.sol";
-import "./interfaces/IBEP20.sol";
-import "./interfaces/IBEP20Burnable.sol";
+import "../lib/TransferHelper.sol";
+import "../interfaces/IBEP20.sol";
+import "../interfaces/IBEP20Burnable.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "./InvestorPassbook.sol";
 

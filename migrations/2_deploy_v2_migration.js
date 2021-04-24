@@ -109,7 +109,8 @@ module.exports = async function (deployer, network, accounts) {
         }).then(async paymentToken => {
             let latestBlock = await web3.eth.getBlock('latest');
             let tokenPerBlock = web3.utils.toWei('2', 'ether');
-            let startBlock = latestBlock.number + 60 / 3 * 60 * 24; // farming will start after 24h
+            // let startBlock = latestBlock.number + 60 / 3 * 60 * 24; // farming will start after 24h
+            let startBlock = latestBlock.number + 60 / 3 * 60 * 24; // farming will start after 12h
             let bonusPeriod = 60 / 3 * 60 * 24 * 180;// 180 days
             console.log('Bonus period(blocks): ' + bonusPeriod);
             let bonusEndBlock = startBlock + bonusPeriod; // one day, 1 block/3 sec
