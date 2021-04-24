@@ -55,9 +55,10 @@ contract BStableProxyV2 is Ownable {
         uint256 _tokenPerBlock,
         uint256 _startBlock,
         uint256 _bonusEndBlock,
+        address[] memory investors,
         address ownerAddress
     ) public {
-        token = new BStableTokenV2(ownerAddress, address(this));
+        token = new BStableTokenV2(ownerAddress, address(this), investors);
         devaddr = _devaddr;
         tokenPerBlock = _tokenPerBlock;
         bonusEndBlock = _bonusEndBlock;
@@ -249,5 +250,4 @@ contract BStableProxyV2 is Ownable {
     function getTokenAddress() external view returns (address) {
         return address(token);
     }
-
 }

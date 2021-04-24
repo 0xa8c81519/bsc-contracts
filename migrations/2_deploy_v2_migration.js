@@ -42,6 +42,7 @@ module.exports = async function (deployer, network, accounts) {
         let renBtcAddress;
         let anyBtcAddress;
         let usdcAddress;
+        let qusdAddress;
         let p1Address;
         let p2Address;
         let p3Address;
@@ -51,47 +52,39 @@ module.exports = async function (deployer, network, accounts) {
         }).then(dai => {
             daiAddress = dai.address;
             let totalSupply = web3.utils.toWei('100000000', 'ether');
-            return StableCoin.new("tUSD for BStable test", "tUSD", totalSupply);
+            return StableCoin.new("tBUSD for BStable test", "tBUSD", totalSupply);
         }).then(busd => {
             busdAddress = busd.address;
             let totalSupply = web3.utils.toWei('100000000', 'ether');
             return StableCoin.new("tUSDT for BStable test", "tUSDT", totalSupply);
-        }).then(usdt => {
+        }).then(usdt => { // pool1
             usdtAddress = usdt.address;
             let stableCoins = [daiAddress, busdAddress, usdtAddress];
             let A = 1000;
-            let fee = '10000000';
-            let adminFee = '5000000000';
-            return BStablePool.new("BStable Pool (tDAI/tUSD/tUSDT) for test", "BSLP-01", stableCoins, A, fee, adminFee, owner);
+            let fee = '30000000'; // 0.003
+            let adminFee = '6666666667'; // 2/3
+            return BStablePool.new("BStable Pool (tDAI/tBUSD/tUSDT) for test", "BSLP-01", stableCoins, A, fee, adminFee, owner);
         }).then(pool => {
             let totalSupply = web3.utils.toWei('100000000', 'ether');
             p1Address = pool.address;
-            return StableCoin.new("aBTC for BStable test", "aBTC", totalSupply);
-        }).then(btcb => {
+            return StableCoin.new("tQUSD for BStable test", "tQUSD", totalSupply);
+        }).then(qusd => {
             let totalSupply = web3.utils.toWei('100000000', 'ether');
-            btcbAddress = btcb.address;
-            return StableCoin.new("bBTC for BStable test", "bBTC", totalSupply);
-        }).then(renBtc => {
-            let totalSupply = web3.utils.toWei('100000000', 'ether');
-            renBtcAddress = renBtc.address;
-            return StableCoin.new("cBTC for BStable test", "cBTC", totalSupply)
-        }).then(anyBtc => {
-            anyBtcAddress = anyBtc.address;
-            let stableCoins = [btcbAddress, renBtcAddress, anyBtcAddress];
+            qusdAddress = qusd.address;
+            return StableCoin.new("tUSDC for BStable test", "tUSDC", totalSupply);
+        }).then(usdc => { // pool2
+            usdcAddress = usdc.address;
+            let stableCoins = [qusdAddress, busdAddress, usdtAddress];
             let A = 1000;
-            let fee = '10000000';
-            let adminFee = '5000000000';
-            return BStablePool.new("BStable Pool (aBTC/bBTC/cBTC) for test", "BSLP-02", stableCoins, A, fee, adminFee, owner);
-        }).then(pool => {
+            let fee = '30000000'; // 0.003
+            let adminFee = '6666666667'; // 2/3
+            return BStablePool.new("BStable Pool (tQUSD/tBUSD/tUSDT) for test", "BSLP-02", stableCoins, A, fee, adminFee, owner);
+        }).then(pool => { // pool3
             p2Address = pool.address;
-            let totalSupply = web3.utils.toWei('100000000', 'ether');
-            return StableCoin.new("tUSDC for BStable test", "tUSDC", totalSupply)
-        }).then(tUSDC => {
-            usdcAddress = tUSDC.address;
             let stableCoins = [usdcAddress, busdAddress, usdtAddress];
             let A = 1000;
-            let fee = '10000000';
-            let adminFee = '5000000000';
+            let fee = '30000000'; // 0.003
+            let adminFee = '6666666667'; // 2/3
             return BStablePool.new("BStable Pool (tUSDC/tBUSD/tUSDT) for test", "BSLP-03", stableCoins, A, fee, adminFee, owner);
         }).then(async pool => {
             p3Address = pool.address;
@@ -114,15 +107,28 @@ module.exports = async function (deployer, network, accounts) {
             let bonusPeriod = 60 / 3 * 60 * 24 * 180;// 180 days
             console.log('Bonus period(blocks): ' + bonusPeriod);
             let bonusEndBlock = startBlock + bonusPeriod; // one day, 1 block/3 sec
-            let proxy = await BStableProxyV2.new(dev, tokenPerBlock, startBlock, bonusEndBlock, owner);
+            let investors = [
+                '0x13B9d7375b134d0903f809505d41A6483c39F759',
+                '0x4E9F49BE3feD5833C0A8e401fcbda76c38DA9b89',
+                '0x9db99155182E5cccb03D267B56DC6E7867703c15',
+                '0x75cCF9dF980A261D116abD660940FbBB5eD59e4E',
+                '0x10299E238D238128119fB96705d669A20B09B114',
+                '0xec0D02dd0ACBb3a7Ef22D5fA2Bd1d59985dAf2bF',
+                '0x347702b59206D362bCb4694DB9fd8A07366fC32B',
+                '0x3c09AAAb05371581730BED12D6372313d2B44ca7',
+                '0xA04c97c1c00300CcfA230a1D1b4E8Dc241861A3e',
+                '0x76EFD6e0A9322a7b9dCA70a1972453814A5687c4'
+            ];
+
+            let proxy = await BStableProxyV2.new(dev, tokenPerBlock, startBlock, bonusEndBlock, investors, owner);
             // await proxy.createWallet();
             let bstAddress = await proxy.getTokenAddress();
             // console.log("Token's address: " + bstAddress);
             console.log("Proxy's address: " + proxy.address);
-            await proxy.add(3, p1Address, false);
-            await proxy.add(2, p2Address, false);
-            await proxy.add(4, p3Address, false);
-            await proxy.add(1, paymentToken.address, false);
+            await proxy.add(5, p1Address, false);
+            await proxy.add(5, p2Address, false);
+            await proxy.add(40, p3Address, false);
+            await proxy.add(50, paymentToken.address, false);
         });
     } else {
 
