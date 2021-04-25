@@ -88,40 +88,40 @@ contract('BStable Payment', async accounts => {
             await pool.add_liquidity([amt, amt, amt], '0');
             console.log('accounts[0] LP: ' + new BigNumber(await pool.balanceOf(accounts[0])).div(denominator).toFormat(18, BigNumber.ROUND_DOWN));
         });
-        // it('Show status.', async () => {
-        //     await showStatus();
-        // }).timeout(84600 * 1000);
-        // it('Pay', async () => {
-        //     let amt = web3.utils.toWei('10', 'ether');
-        //     await usdc.approve(payment.address, amt, { from: accounts[1] });
-        //     await payment.pay(usdc.address, accounts[2], amt, { from: accounts[1] });
-        // });
-        // it('Show status.', async () => {
-        //     await showStatus();
-        // }).timeout(84600 * 1000);
-        // it('Pay with swap', async () => { // need pay 10usdc, but use busd.
-        //     let amt = web3.utils.toWei('10', 'ether');
-        //     // asume can acceptable slippage is 0.05
-        //     let accutalPay = new BigNumber(amt).multipliedBy(1 + 0.05).toFixed(0, BigNumber.ROUND_DOWN);
-        //     await busd.approve(payment.address, accutalPay, { from: accounts[1] });
-        //     await payment.payWithSwap(busd.address, usdc.address, accutalPay, amt, accounts[2], { from: accounts[1] });
-        // });
-        // it('Show status.', async () => {
-        //     await showStatus();
-        // }).timeout(84600 * 1000);
-        // it('Stake payment token', async () => { // need pay 10usdc, but use busd.
-        //     let paymentTokenBal = await paymentToken.balanceOf(accounts[1]);
-        //     await paymentToken.approve(proxy.address, proxy.address, { from: accounts[1] });
-        //     await proxy.deposit('3', paymentTokenBal, { from: accounts[1] });
-        // });
-        // it('Show status.', async () => {
-        //     await showStatus();
-        // }).timeout(84600 * 1000);
-        // it('Get pending BST', async () => { // need pay 10usdc, but use busd.
-        //     await proxy.withdraw('3', '0', { from: accounts[1] });
-        // });
-        // it('Show status.', async () => {
-        //     await showStatus();
-        // }).timeout(84600 * 1000);
+        it('Show status.', async () => {
+            await showStatus();
+        }).timeout(84600 * 1000);
+        it('Pay', async () => {
+            let amt = web3.utils.toWei('10', 'ether');
+            await usdc.approve(payment.address, amt, { from: accounts[1] });
+            await payment.pay(usdc.address, accounts[2], amt, { from: accounts[1] });
+        });
+        it('Show status.', async () => {
+            await showStatus();
+        }).timeout(84600 * 1000);
+        it('Pay with swap', async () => { // need pay 10usdc, but use busd.
+            let amt = web3.utils.toWei('10', 'ether');
+            // asume can acceptable slippage is 0.05
+            let accutalPay = new BigNumber(amt).multipliedBy(1 + 0.05).toFixed(0, BigNumber.ROUND_DOWN);
+            await busd.approve(payment.address, accutalPay, { from: accounts[1] });
+            await payment.payWithSwap(busd.address, usdc.address, accutalPay, amt, accounts[2], { from: accounts[1] });
+        });
+        it('Show status.', async () => {
+            await showStatus();
+        }).timeout(84600 * 1000);
+        it('Stake payment token', async () => { // need pay 10usdc, but use busd.
+            let paymentTokenBal = await paymentToken.balanceOf(accounts[1]);
+            await paymentToken.approve(proxy.address, proxy.address, { from: accounts[1] });
+            await proxy.deposit('3', paymentTokenBal, { from: accounts[1] });
+        });
+        it('Show status.', async () => {
+            await showStatus();
+        }).timeout(84600 * 1000);
+        it('Get pending BST', async () => { // need pay 10usdc, but use busd.
+            await proxy.withdraw('3', '0', { from: accounts[1] });
+        });
+        it('Show status.', async () => {
+            await showStatus();
+        }).timeout(84600 * 1000);
     });
 });

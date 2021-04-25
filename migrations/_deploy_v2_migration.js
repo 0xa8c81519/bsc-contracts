@@ -3,6 +3,7 @@ const StableCoin = artifacts.require("StableCoin");
 const BStableProxyV2 = artifacts.require("BStableProxyV2");
 const PaymentToken = artifacts.require("PaymentToken");
 const BStablePayment = artifacts.require("BStablePayment");
+const BEP20 = artifacts.require("BEP20");
 const config = {
     // owner: '',
     // dev: ''
@@ -34,6 +35,15 @@ module.exports = async function (deployer, network, accounts) {
     } else if (deployer.network_id == 1) { // main net
     } else if (deployer.network_id == 42) { // kovan
     } else if (deployer.network_id == 56) { // bsc main net
+        let usdcAddress = '';
+        let busdAddress = '';
+        let usdtAddress = '';
+        let _owner='';
+        let stableCoins = [usdcAddress, busdAddress, usdtAddress];
+        let A = 1000;
+        let fee = '30000000'; // 0.003
+        let adminFee = '6666666667'; // 2/3
+        BStablePool.new("BStable Pool (USDC / BUSD / USDT)", "BSLP-03", stableCoins, A, fee, adminFee, _owner);
     } else if (deployer.network_id == 5777 || deployer.network_id == 97) { //dev or bsc_test
         let daiAddress;
         let busdAddress;
@@ -103,7 +113,7 @@ module.exports = async function (deployer, network, accounts) {
             let latestBlock = await web3.eth.getBlock('latest');
             let tokenPerBlock = web3.utils.toWei('2', 'ether');
             // let startBlock = latestBlock.number + 60 / 3 * 60 * 24; // farming will start after 24h
-            let startBlock = latestBlock.number + 60 / 3 * 60 * 24; // farming will start after 12h
+            let startBlock = latestBlock.number + 60 / 3 * 60 * 12; // farming will start after 12h
             let bonusPeriod = 60 / 3 * 60 * 24 * 180;// 180 days
             console.log('Bonus period(blocks): ' + bonusPeriod);
             let bonusEndBlock = startBlock + bonusPeriod; // one day, 1 block/3 sec
