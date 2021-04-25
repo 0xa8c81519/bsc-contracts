@@ -15,20 +15,20 @@ module.exports = function (deployer, network, accounts) {
     } else if (deployer.network_id == 1) { // main net
     } else if (deployer.network_id == 42) { // kovan
     } else if (deployer.network_id == 56) { // bsc main net
-        let pool2 = '0x27f545300f7b93c1c0184979762622db043b0805';
-        BStableProxyV2.deployed().then(proxy => {
-            return proxy.add(5, pool2, fasle);
+        let pool1 = '0x9c00954a8a58f5dda8c011d6233093763f13c8da';
+        return BStableProxyV2.deployed().then(proxy => {
+            return proxy.add(5, pool1, false);
         });
-        // BStableProxyV2.at('').then(proxy => {
-        //     return proxy.add(5, pool1, fasle);
+        //return BStableProxyV2.at('').then(proxy => {
+        //     return proxy.add(5, pool1, false);
         // });
     } else if (deployer.network_id == 5777 || deployer.network_id == 97) { //dev or bsc_test
-        let pool2 = '0x27f545300f7b93c1c0184979762622db043b0805';
-        BStableProxyV2.deployed().then(proxy => {
-            return proxy.add(5, pool2, fasle);
+        let pool1 = '0x9c00954a8a58f5dda8c011d6233093763f13c8da';
+        return BStableProxyV2.deployed().then(proxy => {
+            return proxy.add(5, pool1, false);
         });
-        // BStableProxyV2.at('').then(proxy => {
-        //     return proxy.add(5, pool2, fasle);
+        //return BStableProxyV2.at('').then(proxy => {
+        //     return proxy.add(5, pool1, false);
         // });
     } else {
 

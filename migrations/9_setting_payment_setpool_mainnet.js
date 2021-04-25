@@ -1,5 +1,5 @@
-const PaymentToken = artifacts.require("PaymentToken");
 const BStablePayment = artifacts.require("BStablePayment");
+const BStablePool = artifacts.require("BStablePool");
 
 module.exports = function (deployer, network, accounts) {
 
@@ -16,25 +16,25 @@ module.exports = function (deployer, network, accounts) {
     } else if (deployer.network_id == 1) { // main net
     } else if (deployer.network_id == 42) { // kovan
     } else if (deployer.network_id == 56) { // bsc main net
-        BStablePayment.deployed().then(payment => {
-            PaymentToken.deployed().then(paymentToken => {
-                return paymentToken.setMinter(payment.address);
+        return BStablePool.deployed().then(pool => {
+            return BStablePayment.deployed().then(payment => {
+                return payment.setPool(pool.address);
             });
         });
-        // BStablePayment.at('').then(payment => {
-        //     PaymentToken.at('').then(paymentToken => {
-        //         return paymentToken.setMinter(payment.address);
+        //return BStablePool.at('').then(pool => {
+        //return     BStablePayment.at('').then(payment => {
+        //         return payment.setPool(pool.address);
         //     });
         // });
     } else if (deployer.network_id == 5777 || deployer.network_id == 97) { //dev or bsc_test
-        BStablePayment.deployed().then(payment => {
-            PaymentToken.deployed().then(paymentToken => {
-                return paymentToken.setMinter(payment.address);
+        return BStablePool.deployed().then(pool => {
+            return BStablePayment.deployed().then(payment => {
+                return payment.setPool(pool.address);
             });
         });
-        // BStablePayment.at('').then(payment => {
-        //     PaymentToken.at('').then(paymentToken => {
-        //         return paymentToken.setMinter(payment.address);
+        //return BStablePool.at('').then(pool => {
+        //return     BStablePayment.at('').then(payment => {
+        //         return payment.setPool(pool.address);
         //     });
         // });
     } else {

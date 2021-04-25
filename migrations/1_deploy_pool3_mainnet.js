@@ -25,7 +25,6 @@ module.exports = function (deployer, network, accounts) {
         let adminFee = '6666666667'; // 2/3
         return deployer.deploy(BStablePool, "BStable Pool (USDC / BUSD / USDT)", "BSLP-03", stableCoins, A, fee, adminFee, _owner).then(res => {
             console.log('Pool3\'s address: ' + BStablePool.address);
-            console.log(res);
         });
     } else if (deployer.network_id == 5777 || deployer.network_id == 97) { //dev or bsc_test
         let usdcAddress = '0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d';
@@ -38,7 +37,6 @@ module.exports = function (deployer, network, accounts) {
         let adminFee = '6666666667'; // 2/3
         return deployer.deploy(BStablePool, "BStable Pool (USDC / BUSD / USDT)", "BSLP-03", stableCoins, A, fee, adminFee, _owner).then(res => {
             console.log('Pool3\'s address: ' + BStablePool.address);
-            console.log(res);
         });
     } else {
 
