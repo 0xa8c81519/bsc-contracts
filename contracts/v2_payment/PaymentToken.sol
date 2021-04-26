@@ -7,7 +7,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 ///@dev All data's decimal is 18.
 contract PaymentToken is BEP20, Ownable {
     using SafeMath for uint256;
-    address minter;
+    address public minter;
 
     event SetMinter(address minter);
 

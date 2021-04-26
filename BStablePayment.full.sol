@@ -1,106 +1,3 @@
-// File: @openzeppelin/contracts/utils/Context.sol
-
-// SPDX-License-Identifier: MIT
-
-pragma solidity >=0.6.0 <0.8.0;
-
-/*
- * @dev Provides information about the current execution context, including the
- * sender of the transaction and its data. While these are generally available
- * via msg.sender and msg.data, they should not be accessed in such a direct
- * manner, since when dealing with GSN meta-transactions the account sending and
- * paying for execution may not be the actual sender (as far as an application
- * is concerned).
- *
- * This contract is only required for intermediate, library-like contracts.
- */
-abstract contract Context {
-    function _msgSender() internal view virtual returns (address payable) {
-        return msg.sender;
-    }
-
-    function _msgData() internal view virtual returns (bytes memory) {
-        this; // silence state mutability warning without generating bytecode - see https://github.com/ethereum/solidity/issues/2691
-        return msg.data;
-    }
-}
-
-// File: @openzeppelin/contracts/GSN/Context.sol
-
-// SPDX-License-Identifier: MIT
-
-pragma solidity >=0.6.0 <0.8.0;
-
-// File: @openzeppelin/contracts/access/Ownable.sol
-
-// SPDX-License-Identifier: MIT
-
-pragma solidity >=0.6.0 <0.8.0;
-
-/**
- * @dev Contract module which provides a basic access control mechanism, where
- * there is an account (an owner) that can be granted exclusive access to
- * specific functions.
- *
- * By default, the owner account will be the one that deploys the contract. This
- * can later be changed with {transferOwnership}.
- *
- * This module is used through inheritance. It will make available the modifier
- * `onlyOwner`, which can be applied to your functions to restrict their use to
- * the owner.
- */
-abstract contract Ownable is Context {
-    address private _owner;
-
-    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
-
-    /**
-     * @dev Initializes the contract setting the deployer as the initial owner.
-     */
-    constructor () internal {
-        address msgSender = _msgSender();
-        _owner = msgSender;
-        emit OwnershipTransferred(address(0), msgSender);
-    }
-
-    /**
-     * @dev Returns the address of the current owner.
-     */
-    function owner() public view virtual returns (address) {
-        return _owner;
-    }
-
-    /**
-     * @dev Throws if called by any account other than the owner.
-     */
-    modifier onlyOwner() {
-        require(owner() == _msgSender(), "Ownable: caller is not the owner");
-        _;
-    }
-
-    /**
-     * @dev Leaves the contract without owner. It will not be possible to call
-     * `onlyOwner` functions anymore. Can only be called by the current owner.
-     *
-     * NOTE: Renouncing ownership will leave the contract without an owner,
-     * thereby removing any functionality that is only available to the owner.
-     */
-    function renounceOwnership() public virtual onlyOwner {
-        emit OwnershipTransferred(_owner, address(0));
-        _owner = address(0);
-    }
-
-    /**
-     * @dev Transfers ownership of the contract to a new account (`newOwner`).
-     * Can only be called by the current owner.
-     */
-    function transferOwnership(address newOwner) public virtual onlyOwner {
-        require(newOwner != address(0), "Ownable: new owner is the zero address");
-        emit OwnershipTransferred(_owner, newOwner);
-        _owner = newOwner;
-    }
-}
-
 // File: contracts/interfaces/IBEP20.sol
 
 pragma solidity ^0.6.0;
@@ -189,6 +86,100 @@ interface IBEP20 {
      * a call to {approve}. `value` is the new allowance.
      */
     event Approval(address indexed owner, address indexed spender, uint256 value);
+}
+
+// File: contracts/interfaces/IPaymentToken.sol
+
+pragma solidity ^0.6.0;
+
+
+interface IPaymentToken is IBEP20 {
+    function transferMinterTo(address _minter) external;
+
+    function mintTo(address to, uint256 amount) external;
+}
+
+// File: contracts/interfaces/IBStablePool.sol
+
+pragma solidity ^0.6.0;
+
+
+interface IBStablePool is IBEP20 {
+    function A() external view returns (uint256 A1);
+
+    function get_virtual_price() external view returns (uint256 price);
+
+    function calc_token_amount(uint256[] calldata amounts, bool deposit)
+        external
+        view
+        returns (uint256 result);
+
+    function add_liquidity(uint256[] calldata amounts, uint256 min_mint_amount)
+        external;
+
+    function get_dy(
+        uint256 i,
+        uint256 j,
+        uint256 dx
+    ) external view returns (uint256 result);
+
+    function get_dy_underlying(
+        uint256 i,
+        uint256 j,
+        uint256 dx
+    ) external view returns (uint256 result);
+
+    function exchange(
+        uint256 i,
+        uint256 j,
+        uint256 dx,
+        uint256 min_dy
+    ) external;
+
+    function remove_liquidity(uint256 _amount, uint256[] calldata min_amounts)
+        external;
+
+    function remove_liquidity_imbalance(
+        uint256[] calldata amounts,
+        uint256 max_burn_amount
+    ) external;
+
+    function calc_withdraw_one_coin(uint256 _token_amount, uint256 i)
+        external
+        view
+        returns (uint256 result);
+
+    function remove_liquidity_one_coin(
+        uint256 _token_amount,
+        uint256 i,
+        uint256 min_amount
+    ) external;
+
+    function ramp_A(uint256 _future_A, uint256 _future_time) external;
+
+    function stop_ramp_A() external;
+
+    function commit_new_fee(uint256 new_fee, uint256 new_admin_fee) external;
+
+    function apply_new_fee() external;
+
+    function revert_new_parameters() external;
+
+    function revert_transfer_ownership() external;
+
+    function admin_balances(uint256 i) external view returns (uint256 balance);
+
+    function withdraw_admin_fees() external;
+
+    function donate_admin_fees() external;
+
+    function kill_me() external;
+
+    function unkill_me() external;
+
+    function transferOwnership(address newOwner) external;
+
+    function owner() external view returns (address _owner);
 }
 
 // File: @openzeppelin/contracts/math/SafeMath.sol
@@ -407,6 +398,109 @@ library SafeMath {
         return a % b;
     }
 }
+
+// File: @openzeppelin/contracts/utils/Context.sol
+
+// SPDX-License-Identifier: MIT
+
+pragma solidity >=0.6.0 <0.8.0;
+
+/*
+ * @dev Provides information about the current execution context, including the
+ * sender of the transaction and its data. While these are generally available
+ * via msg.sender and msg.data, they should not be accessed in such a direct
+ * manner, since when dealing with GSN meta-transactions the account sending and
+ * paying for execution may not be the actual sender (as far as an application
+ * is concerned).
+ *
+ * This contract is only required for intermediate, library-like contracts.
+ */
+abstract contract Context {
+    function _msgSender() internal view virtual returns (address payable) {
+        return msg.sender;
+    }
+
+    function _msgData() internal view virtual returns (bytes memory) {
+        this; // silence state mutability warning without generating bytecode - see https://github.com/ethereum/solidity/issues/2691
+        return msg.data;
+    }
+}
+
+// File: @openzeppelin/contracts/access/Ownable.sol
+
+// SPDX-License-Identifier: MIT
+
+pragma solidity >=0.6.0 <0.8.0;
+
+/**
+ * @dev Contract module which provides a basic access control mechanism, where
+ * there is an account (an owner) that can be granted exclusive access to
+ * specific functions.
+ *
+ * By default, the owner account will be the one that deploys the contract. This
+ * can later be changed with {transferOwnership}.
+ *
+ * This module is used through inheritance. It will make available the modifier
+ * `onlyOwner`, which can be applied to your functions to restrict their use to
+ * the owner.
+ */
+abstract contract Ownable is Context {
+    address private _owner;
+
+    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
+
+    /**
+     * @dev Initializes the contract setting the deployer as the initial owner.
+     */
+    constructor () internal {
+        address msgSender = _msgSender();
+        _owner = msgSender;
+        emit OwnershipTransferred(address(0), msgSender);
+    }
+
+    /**
+     * @dev Returns the address of the current owner.
+     */
+    function owner() public view virtual returns (address) {
+        return _owner;
+    }
+
+    /**
+     * @dev Throws if called by any account other than the owner.
+     */
+    modifier onlyOwner() {
+        require(owner() == _msgSender(), "Ownable: caller is not the owner");
+        _;
+    }
+
+    /**
+     * @dev Leaves the contract without owner. It will not be possible to call
+     * `onlyOwner` functions anymore. Can only be called by the current owner.
+     *
+     * NOTE: Renouncing ownership will leave the contract without an owner,
+     * thereby removing any functionality that is only available to the owner.
+     */
+    function renounceOwnership() public virtual onlyOwner {
+        emit OwnershipTransferred(_owner, address(0));
+        _owner = address(0);
+    }
+
+    /**
+     * @dev Transfers ownership of the contract to a new account (`newOwner`).
+     * Can only be called by the current owner.
+     */
+    function transferOwnership(address newOwner) public virtual onlyOwner {
+        require(newOwner != address(0), "Ownable: new owner is the zero address");
+        emit OwnershipTransferred(_owner, newOwner);
+        _owner = newOwner;
+    }
+}
+
+// File: @openzeppelin/contracts/GSN/Context.sol
+
+// SPDX-License-Identifier: MIT
+
+pragma solidity >=0.6.0 <0.8.0;
 
 // File: @openzeppelin/contracts/utils/Address.sol
 
@@ -974,49 +1068,37 @@ contract BEP20 is Context, IBEP20 {
     ) internal virtual {}
 }
 
-// File: contracts/BEP20Burnable.sol
+// File: contracts/lib/TransferHelper.sol
 
-// SPDX-License-Identifier: MIT
+pragma solidity >=0.6.0;
 
-pragma solidity ^0.6.0;
-
-
-
-/**
- * @dev Extension of {BEP20} that allows token holders to destroy both their own
- * tokens and those that they have an allowance for, in a way that can be
- * recognized off-chain (via event analysis).
- */
-abstract contract BEP20Burnable is Context, BEP20 {
-    /**
-     * @dev Destroys `amount` tokens from the caller.
-     *
-     * See {BEP20-_burn}.
-     */
-    function burn(uint256 amount) public virtual {
-        _burn(_msgSender(), amount);
+// helper mBNBods for interacting with BEP20 tokens and sending BNB that do not consistently return true/false
+library TransferHelper {
+    function safeApprove(address token, address to, uint value) internal {
+        // bytes4(keccak256(bytes('approve(address,uint256)')));
+        (bool success, bytes memory data) = token.call(abi.encodeWithSelector(0x095ea7b3, to, value));
+        require(success && (data.length == 0 || abi.decode(data, (bool))), 'TransferHelper: APPROVE_FAILED');
     }
 
-    /**
-     * @dev Destroys `amount` tokens from `account`, deducting from the caller's
-     * allowance.
-     *
-     * See {BEP20-_burn} and {BEP20-allowance}.
-     *
-     * Requirements:
-     *
-     * - the caller must have allowance for ``accounts``'s tokens of at least
-     * `amount`.
-     */
-    function burnFrom(address account, uint256 amount) public virtual {
-        uint256 decreasedAllowance = allowance(account, _msgSender()).sub(amount, "BEP20: burn amount exceeds allowance");
+    function safeTransfer(address token, address to, uint value) internal {
+        // bytes4(keccak256(bytes('transfer(address,uint256)')));
+        (bool success, bytes memory data) = token.call(abi.encodeWithSelector(0xa9059cbb, to, value));
+        require(success && (data.length == 0 || abi.decode(data, (bool))), 'TransferHelper: TRANSFER_FAILED');
+    }
 
-        _approve(account, _msgSender(), decreasedAllowance);
-        _burn(account, amount);
+    function safeTransferFrom(address token, address from, address to, uint value) internal {
+        // bytes4(keccak256(bytes('transferFrom(address,address,uint256)')));
+        (bool success, bytes memory data) = token.call(abi.encodeWithSelector(0x23b872dd, from, to, value));
+        require(success && (data.length == 0 || abi.decode(data, (bool))), 'TransferHelper: TRANSFER_FROM_FAILED');
+    }
+
+    function safeTransferBNB(address to, uint value) internal {
+        (bool success,) = to.call{value:value}(new bytes(0));
+        require(success, 'TransferHelper: BNB_TRANSFER_FAILED');
     }
 }
 
-// File: contracts/v2/BStableTokenV2.sol
+// File: contracts/v2_payment/BStablePayment.sol
 
 // SPDX-License-Identifier: MIT
 
@@ -1024,285 +1106,106 @@ pragma solidity ^0.6.0;
 
 
 
-///@title BSTToken with Governance.
-contract BStableTokenV2 is
-    BEP20("BStable Token", "BST"),
-    BEP20Burnable,
-    Ownable
-{
-    address public minter;
 
-    uint256 public TOKENS_PER_INVESTOR = 1_000_000 ether;
+
+
+
+
+contract BStablePayment is BEP20, Ownable {
+    using SafeMath for uint256;
+
+    IPaymentToken public paymentToken;
+
+    IBStablePool public pool;
+
+    struct CoinInfo {
+        uint256 index;
+        bool available;
+    }
+
+    mapping(address => CoinInfo) public coins;
+
+    event Pay(
+        address payToken,
+        address receiptToken,
+        address payer,
+        address recipt
+    );
 
     constructor(
-        address owner,
-        address minter_,
-        address[] memory investors
-    ) public {
-        require(investors.length == 10, "only have 10 investor address");
-        transferOwnership(owner);
-        minter = minter_;
-        for (uint256 i = 0; i < 10; i++) {
-            _mint(investors[i], TOKENS_PER_INVESTOR);
-        }
+        string memory _name,
+        string memory _symbol,
+        address _owner
+    ) public BEP20(_name, _symbol) {
+        transferOwnership(_owner);
     }
 
-    /// @notice Creates `_amount` token to `_to`. Must only be called by the owner (BStableProxyV2).
-    function mint(address _to, uint256 _amount) public {
-        require(msg.sender == minter, "BStableTokenV2:only minter.");
-        _mint(_to, _amount);
-        _moveDelegates(address(0), _delegates[_to], _amount);
+    function addCoins(address _coin, uint32 index) public onlyOwner {
+        require(!coins[_coin].available, "Payment: coins dumplicated.");
+        coins[_coin] = CoinInfo({index: index, available: true});
     }
 
-    /// @notice A record of each accounts delegate
-    mapping(address => address) internal _delegates;
-
-    /// @notice A checkpoint for marking number of votes from a given block
-    struct Checkpoint {
-        uint32 fromBlock;
-        uint256 votes;
+    function removeCoins(address _coin) public onlyOwner {
+        require(coins[_coin].available == true, "Payment: coin no exists.");
+        coins[_coin].available = false;
     }
 
-    /// @notice A record of votes checkpoints for each account, by index
-    mapping(address => mapping(uint32 => Checkpoint)) public checkpoints;
-
-    /// @notice The number of checkpoints for each account
-    mapping(address => uint32) public numCheckpoints;
-
-    /// @notice The EIP-712 typehash for the contract's domain
-    bytes32 public constant DOMAIN_TYPEHASH =
-        keccak256(
-            "EIP712Domain(string name,uint256 chainId,address verifyingContract)"
-        );
-
-    /// @notice The EIP-712 typehash for the delegation struct used by the contract
-    bytes32 public constant DELEGATION_TYPEHASH =
-        keccak256("Delegation(address delegatee,uint256 nonce,uint256 expiry)");
-
-    /// @notice A record of states for signing / validating signatures
-    mapping(address => uint256) public nonces;
-
-    /// @notice An event thats emitted when an account changes its delegate
-    event DelegateChanged(
-        address indexed delegator,
-        address indexed fromDelegate,
-        address indexed toDelegate
-    );
-
-    /// @notice An event thats emitted when a delegate account's vote balance changes
-    event DelegateVotesChanged(
-        address indexed delegate,
-        uint256 previousBalance,
-        uint256 newBalance
-    );
-
-    /**
-     * @notice Delegate votes from `msg.sender` to `delegatee`
-     * @param delegator The address to get delegatee for
-     */
-    function delegates(address delegator) external view returns (address) {
-        return _delegates[delegator];
+    function setPaymentToken(IPaymentToken _paymentToken) public onlyOwner {
+        paymentToken = _paymentToken;
     }
 
-    /**
-     * @notice Delegate votes from `msg.sender` to `delegatee`
-     * @param delegatee The address to delegate votes to
-     */
-    function delegate(address delegatee) external {
-        return _delegate(msg.sender, delegatee);
+    function transferMinterTo(address _to) public onlyOwner {
+        paymentToken.transferMinterTo(_to);
     }
 
-    /**
-     * @notice Delegates votes from signatory to `delegatee`
-     * @param delegatee The address to delegate votes to
-     * @param nonce The contract state required to match the signature
-     * @param expiry The time at which to expire the signature
-     * @param v The recovery byte of the signature
-     * @param r Half of the ECDSA signature pair
-     * @param s Half of the ECDSA signature pair
-     */
-    function delegateBySig(
-        address delegatee,
-        uint256 nonce,
-        uint256 expiry,
-        uint8 v,
-        bytes32 r,
-        bytes32 s
+    function setPool(IBStablePool _pool) public onlyOwner {
+        pool = _pool;
+    }
+
+    function pay(
+        address receiptToken,
+        address receipt,
+        uint256 amt
     ) external {
-        bytes32 domainSeparator =
-            keccak256(
-                abi.encode(
-                    DOMAIN_TYPEHASH,
-                    keccak256(bytes(name())),
-                    getChainId(),
-                    address(this)
-                )
-            );
-
-        bytes32 structHash =
-            keccak256(
-                abi.encode(DELEGATION_TYPEHASH, delegatee, nonce, expiry)
-            );
-
-        bytes32 digest =
-            keccak256(
-                abi.encodePacked("\x19\x01", domainSeparator, structHash)
-            );
-
-        address signatory = ecrecover(digest, v, r, s);
         require(
-            signatory != address(0),
-            "BST::delegateBySig: invalid signature"
+            amt <= IBEP20(receiptToken).balanceOf(msg.sender),
+            "Payment: insufficient balance."
         );
-        require(
-            nonce == nonces[signatory]++,
-            "BST::delegateBySig: invalid nonce"
+        TransferHelper.safeTransferFrom(receiptToken, msg.sender, receipt, amt);
+        paymentToken.mintTo(msg.sender, 1_000_000_000_000_000_000);
+        emit Pay(receiptToken, receiptToken, msg.sender, receipt);
+    }
+
+    function payWithSwap(
+        address payToken,
+        address receiptToken,
+        uint256 payAmt,
+        uint256 receiptAmt,
+        address receipt
+    ) external {
+        require(payToken != receiptToken, "Payment: the same token.");
+        uint256 i = coins[payToken].index;
+        uint256 j = coins[receiptToken].index;
+        TransferHelper.safeTransferFrom(
+            payToken,
+            msg.sender,
+            address(this),
+            payAmt
         );
-        require(now <= expiry, "BST::delegateBySig: signature expired");
-        return _delegate(signatory, delegatee);
-    }
-
-    /**
-     * @notice Gets the current votes balance for `account`
-     * @param account The address to get votes balance
-     * @return The number of current votes for `account`
-     */
-    function getCurrentVotes(address account) external view returns (uint256) {
-        uint32 nCheckpoints = numCheckpoints[account];
-        return
-            nCheckpoints > 0 ? checkpoints[account][nCheckpoints - 1].votes : 0;
-    }
-
-    /**
-     * @notice Determine the prior number of votes for an account as of a block number
-     * @dev Block number must be a finalized block or else this function will revert to prevent misinformation.
-     * @param account The address of the account to check
-     * @param blockNumber The block number to get the vote balance at
-     * @return The number of votes the account had as of the given block
-     */
-    function getPriorVotes(address account, uint256 blockNumber)
-        external
-        view
-        returns (uint256)
-    {
-        require(
-            blockNumber < block.number,
-            "BST::getPriorVotes: not yet determined"
+        TransferHelper.safeApprove(payToken, address(pool), payAmt);
+        uint256 _originalBalance =
+            IBEP20(receiptToken).balanceOf(address(this));
+        pool.exchange(i, j, payAmt, receiptAmt);
+        uint256 returnAmt =
+            IBEP20(receiptToken).balanceOf(address(this)).sub(_originalBalance);
+        require(returnAmt >= receiptAmt, "Payment: swap amt insufficient.");
+        TransferHelper.safeTransfer(receiptToken, receipt, receiptAmt);
+        TransferHelper.safeTransfer(
+            receiptToken,
+            msg.sender,
+            returnAmt.sub(receiptAmt)
         );
-
-        uint32 nCheckpoints = numCheckpoints[account];
-        if (nCheckpoints == 0) {
-            return 0;
-        }
-
-        // First check most recent balance
-        if (checkpoints[account][nCheckpoints - 1].fromBlock <= blockNumber) {
-            return checkpoints[account][nCheckpoints - 1].votes;
-        }
-
-        // Next check implicit zero balance
-        if (checkpoints[account][0].fromBlock > blockNumber) {
-            return 0;
-        }
-
-        uint32 lower = 0;
-        uint32 upper = nCheckpoints - 1;
-        while (upper > lower) {
-            uint32 center = upper - (upper - lower) / 2; // ceil, avoiding overflow
-            Checkpoint memory cp = checkpoints[account][center];
-            if (cp.fromBlock == blockNumber) {
-                return cp.votes;
-            } else if (cp.fromBlock < blockNumber) {
-                lower = center;
-            } else {
-                upper = center - 1;
-            }
-        }
-        return checkpoints[account][lower].votes;
-    }
-
-    function _delegate(address delegator, address delegatee) internal {
-        address currentDelegate = _delegates[delegator];
-        uint256 delegatorBalance = balanceOf(delegator); // balance of underlying BSTs (not scaled);
-        _delegates[delegator] = delegatee;
-
-        emit DelegateChanged(delegator, currentDelegate, delegatee);
-
-        _moveDelegates(currentDelegate, delegatee, delegatorBalance);
-    }
-
-    function _moveDelegates(
-        address srcRep,
-        address dstRep,
-        uint256 amount
-    ) internal {
-        if (srcRep != dstRep && amount > 0) {
-            if (srcRep != address(0)) {
-                // decrease old representative
-                uint32 srcRepNum = numCheckpoints[srcRep];
-                uint256 srcRepOld =
-                    srcRepNum > 0
-                        ? checkpoints[srcRep][srcRepNum - 1].votes
-                        : 0;
-                uint256 srcRepNew = srcRepOld.sub(amount);
-                _writeCheckpoint(srcRep, srcRepNum, srcRepOld, srcRepNew);
-            }
-
-            if (dstRep != address(0)) {
-                // increase new representative
-                uint32 dstRepNum = numCheckpoints[dstRep];
-                uint256 dstRepOld =
-                    dstRepNum > 0
-                        ? checkpoints[dstRep][dstRepNum - 1].votes
-                        : 0;
-                uint256 dstRepNew = dstRepOld.add(amount);
-                _writeCheckpoint(dstRep, dstRepNum, dstRepOld, dstRepNew);
-            }
-        }
-    }
-
-    function _writeCheckpoint(
-        address delegatee,
-        uint32 nCheckpoints,
-        uint256 oldVotes,
-        uint256 newVotes
-    ) internal {
-        uint32 blockNumber =
-            safe32(
-                block.number,
-                "BST::_writeCheckpoint: block number exceeds 32 bits"
-            );
-
-        if (
-            nCheckpoints > 0 &&
-            checkpoints[delegatee][nCheckpoints - 1].fromBlock == blockNumber
-        ) {
-            checkpoints[delegatee][nCheckpoints - 1].votes = newVotes;
-        } else {
-            checkpoints[delegatee][nCheckpoints] = Checkpoint(
-                blockNumber,
-                newVotes
-            );
-            numCheckpoints[delegatee] = nCheckpoints + 1;
-        }
-
-        emit DelegateVotesChanged(delegatee, oldVotes, newVotes);
-    }
-
-    function safe32(uint256 n, string memory errorMessage)
-        internal
-        pure
-        returns (uint32)
-    {
-        require(n < 2**32, errorMessage);
-        return uint32(n);
-    }
-
-    function getChainId() internal pure returns (uint256) {
-        uint256 chainId;
-        assembly {
-            chainId := chainid()
-        }
-        return chainId;
+        paymentToken.mintTo(msg.sender, 1_000_000_000_000_000_000);
+        emit Pay(payToken, receiptToken, msg.sender, receipt);
     }
 }
