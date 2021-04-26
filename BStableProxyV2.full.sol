@@ -169,33 +169,13 @@ interface IBStablePool is IBEP20 {
     function transferOwnership(address newOwner) external;
 
     function owner() external view returns (address _owner);
-
-    function getCoins() external view returns (address[] memory);
-
-    function getBalances() external view returns (uint256[] memory);
-
-    function getFee() external view returns (uint256);
-
-    function getAdminFee() external view returns (uint256);
-
-    function getInitialA() external view returns (uint256);
-
-    function getFutrueA() external view returns (uint256);
-
-    function getinitialATime() external view returns (uint256);
-
-    function getFutureATime() external view returns (uint256);
-
-    function getKillDeadline() external view returns (uint256);
-
-    function getVolume() external view returns (uint256);
 }
 
 // File: @openzeppelin/contracts/math/SafeMath.sol
 
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.6.0;
+pragma solidity >=0.6.0 <0.8.0;
 
 /**
  * @dev Wrappers over Solidity's arithmetic operations with added overflow
@@ -212,6 +192,62 @@ pragma solidity ^0.6.0;
  */
 library SafeMath {
     /**
+     * @dev Returns the addition of two unsigned integers, with an overflow flag.
+     *
+     * _Available since v3.4._
+     */
+    function tryAdd(uint256 a, uint256 b) internal pure returns (bool, uint256) {
+        uint256 c = a + b;
+        if (c < a) return (false, 0);
+        return (true, c);
+    }
+
+    /**
+     * @dev Returns the substraction of two unsigned integers, with an overflow flag.
+     *
+     * _Available since v3.4._
+     */
+    function trySub(uint256 a, uint256 b) internal pure returns (bool, uint256) {
+        if (b > a) return (false, 0);
+        return (true, a - b);
+    }
+
+    /**
+     * @dev Returns the multiplication of two unsigned integers, with an overflow flag.
+     *
+     * _Available since v3.4._
+     */
+    function tryMul(uint256 a, uint256 b) internal pure returns (bool, uint256) {
+        // Gas optimization: this is cheaper than requiring 'a' not being zero, but the
+        // benefit is lost if 'b' is also tested.
+        // See: https://github.com/OpenZeppelin/openzeppelin-contracts/pull/522
+        if (a == 0) return (true, 0);
+        uint256 c = a * b;
+        if (c / a != b) return (false, 0);
+        return (true, c);
+    }
+
+    /**
+     * @dev Returns the division of two unsigned integers, with a division by zero flag.
+     *
+     * _Available since v3.4._
+     */
+    function tryDiv(uint256 a, uint256 b) internal pure returns (bool, uint256) {
+        if (b == 0) return (false, 0);
+        return (true, a / b);
+    }
+
+    /**
+     * @dev Returns the remainder of dividing two unsigned integers, with a division by zero flag.
+     *
+     * _Available since v3.4._
+     */
+    function tryMod(uint256 a, uint256 b) internal pure returns (bool, uint256) {
+        if (b == 0) return (false, 0);
+        return (true, a % b);
+    }
+
+    /**
      * @dev Returns the addition of two unsigned integers, reverting on
      * overflow.
      *
@@ -224,7 +260,6 @@ library SafeMath {
     function add(uint256 a, uint256 b) internal pure returns (uint256) {
         uint256 c = a + b;
         require(c >= a, "SafeMath: addition overflow");
-
         return c;
     }
 
@@ -239,24 +274,8 @@ library SafeMath {
      * - Subtraction cannot overflow.
      */
     function sub(uint256 a, uint256 b) internal pure returns (uint256) {
-        return sub(a, b, "SafeMath: subtraction overflow");
-    }
-
-    /**
-     * @dev Returns the subtraction of two unsigned integers, reverting with custom message on
-     * overflow (when the result is negative).
-     *
-     * Counterpart to Solidity's `-` operator.
-     *
-     * Requirements:
-     *
-     * - Subtraction cannot overflow.
-     */
-    function sub(uint256 a, uint256 b, string memory errorMessage) internal pure returns (uint256) {
-        require(b <= a, errorMessage);
-        uint256 c = a - b;
-
-        return c;
+        require(b <= a, "SafeMath: subtraction overflow");
+        return a - b;
     }
 
     /**
@@ -270,21 +289,14 @@ library SafeMath {
      * - Multiplication cannot overflow.
      */
     function mul(uint256 a, uint256 b) internal pure returns (uint256) {
-        // Gas optimization: this is cheaper than requiring 'a' not being zero, but the
-        // benefit is lost if 'b' is also tested.
-        // See: https://github.com/OpenZeppelin/openzeppelin-contracts/pull/522
-        if (a == 0) {
-            return 0;
-        }
-
+        if (a == 0) return 0;
         uint256 c = a * b;
         require(c / a == b, "SafeMath: multiplication overflow");
-
         return c;
     }
 
     /**
-     * @dev Returns the integer division of two unsigned integers. Reverts on
+     * @dev Returns the integer division of two unsigned integers, reverting on
      * division by zero. The result is rounded towards zero.
      *
      * Counterpart to Solidity's `/` operator. Note: this function uses a
@@ -296,12 +308,51 @@ library SafeMath {
      * - The divisor cannot be zero.
      */
     function div(uint256 a, uint256 b) internal pure returns (uint256) {
-        return div(a, b, "SafeMath: division by zero");
+        require(b > 0, "SafeMath: division by zero");
+        return a / b;
     }
 
     /**
-     * @dev Returns the integer division of two unsigned integers. Reverts with custom message on
+     * @dev Returns the remainder of dividing two unsigned integers. (unsigned integer modulo),
+     * reverting when dividing by zero.
+     *
+     * Counterpart to Solidity's `%` operator. This function uses a `revert`
+     * opcode (which leaves remaining gas untouched) while Solidity uses an
+     * invalid opcode to revert (consuming all remaining gas).
+     *
+     * Requirements:
+     *
+     * - The divisor cannot be zero.
+     */
+    function mod(uint256 a, uint256 b) internal pure returns (uint256) {
+        require(b > 0, "SafeMath: modulo by zero");
+        return a % b;
+    }
+
+    /**
+     * @dev Returns the subtraction of two unsigned integers, reverting with custom message on
+     * overflow (when the result is negative).
+     *
+     * CAUTION: This function is deprecated because it requires allocating memory for the error
+     * message unnecessarily. For custom revert reasons use {trySub}.
+     *
+     * Counterpart to Solidity's `-` operator.
+     *
+     * Requirements:
+     *
+     * - Subtraction cannot overflow.
+     */
+    function sub(uint256 a, uint256 b, string memory errorMessage) internal pure returns (uint256) {
+        require(b <= a, errorMessage);
+        return a - b;
+    }
+
+    /**
+     * @dev Returns the integer division of two unsigned integers, reverting with custom message on
      * division by zero. The result is rounded towards zero.
+     *
+     * CAUTION: This function is deprecated because it requires allocating memory for the error
+     * message unnecessarily. For custom revert reasons use {tryDiv}.
      *
      * Counterpart to Solidity's `/` operator. Note: this function uses a
      * `revert` opcode (which leaves remaining gas untouched) while Solidity
@@ -313,31 +364,15 @@ library SafeMath {
      */
     function div(uint256 a, uint256 b, string memory errorMessage) internal pure returns (uint256) {
         require(b > 0, errorMessage);
-        uint256 c = a / b;
-        // assert(a == b * c + a % b); // There is no case in which this doesn't hold
-
-        return c;
+        return a / b;
     }
 
     /**
      * @dev Returns the remainder of dividing two unsigned integers. (unsigned integer modulo),
-     * Reverts when dividing by zero.
+     * reverting with custom message when dividing by zero.
      *
-     * Counterpart to Solidity's `%` operator. This function uses a `revert`
-     * opcode (which leaves remaining gas untouched) while Solidity uses an
-     * invalid opcode to revert (consuming all remaining gas).
-     *
-     * Requirements:
-     *
-     * - The divisor cannot be zero.
-     */
-    function mod(uint256 a, uint256 b) internal pure returns (uint256) {
-        return mod(a, b, "SafeMath: modulo by zero");
-    }
-
-    /**
-     * @dev Returns the remainder of dividing two unsigned integers. (unsigned integer modulo),
-     * Reverts with custom message when dividing by zero.
+     * CAUTION: This function is deprecated because it requires allocating memory for the error
+     * message unnecessarily. For custom revert reasons use {tryMod}.
      *
      * Counterpart to Solidity's `%` operator. This function uses a `revert`
      * opcode (which leaves remaining gas untouched) while Solidity uses an
@@ -348,7 +383,7 @@ library SafeMath {
      * - The divisor cannot be zero.
      */
     function mod(uint256 a, uint256 b, string memory errorMessage) internal pure returns (uint256) {
-        require(b != 0, errorMessage);
+        require(b > 0, errorMessage);
         return a % b;
     }
 }
@@ -357,7 +392,7 @@ library SafeMath {
 
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.6.2;
+pragma solidity >=0.6.2 <0.8.0;
 
 /**
  * @dev Collection of functions related to the address type
@@ -381,7 +416,7 @@ library Address {
      * ====
      */
     function isContract(address account) internal view returns (bool) {
-        // This method relies in extcodesize, which returns 0 for contracts in
+        // This method relies on extcodesize, which returns 0 for contracts in
         // construction, since the code is only stored at the end of the
         // constructor execution.
 
@@ -444,7 +479,7 @@ library Address {
      * _Available since v3.1._
      */
     function functionCall(address target, bytes memory data, string memory errorMessage) internal returns (bytes memory) {
-        return _functionCallWithValue(target, data, 0, errorMessage);
+        return functionCallWithValue(target, data, 0, errorMessage);
     }
 
     /**
@@ -470,14 +505,62 @@ library Address {
      */
     function functionCallWithValue(address target, bytes memory data, uint256 value, string memory errorMessage) internal returns (bytes memory) {
         require(address(this).balance >= value, "Address: insufficient balance for call");
-        return _functionCallWithValue(target, data, value, errorMessage);
-    }
-
-    function _functionCallWithValue(address target, bytes memory data, uint256 weiValue, string memory errorMessage) private returns (bytes memory) {
         require(isContract(target), "Address: call to non-contract");
 
         // solhint-disable-next-line avoid-low-level-calls
-        (bool success, bytes memory returndata) = target.call{ value: weiValue }(data);
+        (bool success, bytes memory returndata) = target.call{ value: value }(data);
+        return _verifyCallResult(success, returndata, errorMessage);
+    }
+
+    /**
+     * @dev Same as {xref-Address-functionCall-address-bytes-}[`functionCall`],
+     * but performing a static call.
+     *
+     * _Available since v3.3._
+     */
+    function functionStaticCall(address target, bytes memory data) internal view returns (bytes memory) {
+        return functionStaticCall(target, data, "Address: low-level static call failed");
+    }
+
+    /**
+     * @dev Same as {xref-Address-functionCall-address-bytes-string-}[`functionCall`],
+     * but performing a static call.
+     *
+     * _Available since v3.3._
+     */
+    function functionStaticCall(address target, bytes memory data, string memory errorMessage) internal view returns (bytes memory) {
+        require(isContract(target), "Address: static call to non-contract");
+
+        // solhint-disable-next-line avoid-low-level-calls
+        (bool success, bytes memory returndata) = target.staticcall(data);
+        return _verifyCallResult(success, returndata, errorMessage);
+    }
+
+    /**
+     * @dev Same as {xref-Address-functionCall-address-bytes-}[`functionCall`],
+     * but performing a delegate call.
+     *
+     * _Available since v3.4._
+     */
+    function functionDelegateCall(address target, bytes memory data) internal returns (bytes memory) {
+        return functionDelegateCall(target, data, "Address: low-level delegate call failed");
+    }
+
+    /**
+     * @dev Same as {xref-Address-functionCall-address-bytes-string-}[`functionCall`],
+     * but performing a delegate call.
+     *
+     * _Available since v3.4._
+     */
+    function functionDelegateCall(address target, bytes memory data, string memory errorMessage) internal returns (bytes memory) {
+        require(isContract(target), "Address: delegate call to non-contract");
+
+        // solhint-disable-next-line avoid-low-level-calls
+        (bool success, bytes memory returndata) = target.delegatecall(data);
+        return _verifyCallResult(success, returndata, errorMessage);
+    }
+
+    function _verifyCallResult(bool success, bytes memory returndata, string memory errorMessage) private pure returns(bytes memory) {
         if (success) {
             return returndata;
         } else {
@@ -578,7 +661,7 @@ library SafeBEP20 {
 
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.6.0;
+pragma solidity >=0.6.0 <0.8.0;
 
 /**
  * @dev Library for managing
@@ -601,8 +684,8 @@ pragma solidity ^0.6.0;
  * }
  * ```
  *
- * As of v3.0.0, only sets of type `address` (`AddressSet`) and `uint256`
- * (`UintSet`) are supported.
+ * As of v3.3.0, sets of type `bytes32` (`Bytes32Set`), `address` (`AddressSet`)
+ * and `uint256` (`UintSet`) are supported.
  */
 library EnumerableSet {
     // To implement this library for multiple types with as little code
@@ -710,6 +793,60 @@ library EnumerableSet {
         return set._values[index];
     }
 
+    // Bytes32Set
+
+    struct Bytes32Set {
+        Set _inner;
+    }
+
+    /**
+     * @dev Add a value to a set. O(1).
+     *
+     * Returns true if the value was added to the set, that is if it was not
+     * already present.
+     */
+    function add(Bytes32Set storage set, bytes32 value) internal returns (bool) {
+        return _add(set._inner, value);
+    }
+
+    /**
+     * @dev Removes a value from a set. O(1).
+     *
+     * Returns true if the value was removed from the set, that is if it was
+     * present.
+     */
+    function remove(Bytes32Set storage set, bytes32 value) internal returns (bool) {
+        return _remove(set._inner, value);
+    }
+
+    /**
+     * @dev Returns true if the value is in the set. O(1).
+     */
+    function contains(Bytes32Set storage set, bytes32 value) internal view returns (bool) {
+        return _contains(set._inner, value);
+    }
+
+    /**
+     * @dev Returns the number of values in the set. O(1).
+     */
+    function length(Bytes32Set storage set) internal view returns (uint256) {
+        return _length(set._inner);
+    }
+
+   /**
+    * @dev Returns the value stored at position `index` in the set. O(1).
+    *
+    * Note that there are no guarantees on the ordering of values inside the
+    * array, and it may change when more values are added or removed.
+    *
+    * Requirements:
+    *
+    * - `index` must be strictly less than {length}.
+    */
+    function at(Bytes32Set storage set, uint256 index) internal view returns (bytes32) {
+        return _at(set._inner, index);
+    }
+
     // AddressSet
 
     struct AddressSet {
@@ -723,7 +860,7 @@ library EnumerableSet {
      * already present.
      */
     function add(AddressSet storage set, address value) internal returns (bool) {
-        return _add(set._inner, bytes32(uint256(value)));
+        return _add(set._inner, bytes32(uint256(uint160(value))));
     }
 
     /**
@@ -733,14 +870,14 @@ library EnumerableSet {
      * present.
      */
     function remove(AddressSet storage set, address value) internal returns (bool) {
-        return _remove(set._inner, bytes32(uint256(value)));
+        return _remove(set._inner, bytes32(uint256(uint160(value))));
     }
 
     /**
      * @dev Returns true if the value is in the set. O(1).
      */
     function contains(AddressSet storage set, address value) internal view returns (bool) {
-        return _contains(set._inner, bytes32(uint256(value)));
+        return _contains(set._inner, bytes32(uint256(uint160(value))));
     }
 
     /**
@@ -761,7 +898,7 @@ library EnumerableSet {
     * - `index` must be strictly less than {length}.
     */
     function at(AddressSet storage set, uint256 index) internal view returns (address) {
-        return address(uint256(_at(set._inner, index)));
+        return address(uint160(uint256(_at(set._inner, index))));
     }
 
 
@@ -820,11 +957,11 @@ library EnumerableSet {
     }
 }
 
-// File: @openzeppelin/contracts/GSN/Context.sol
+// File: @openzeppelin/contracts/utils/Context.sol
 
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.6.0;
+pragma solidity >=0.6.0 <0.8.0;
 
 /*
  * @dev Provides information about the current execution context, including the
@@ -851,7 +988,7 @@ abstract contract Context {
 
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.6.0;
+pragma solidity >=0.6.0 <0.8.0;
 
 /**
  * @dev Contract module which provides a basic access control mechanism, where
@@ -865,7 +1002,7 @@ pragma solidity ^0.6.0;
  * `onlyOwner`, which can be applied to your functions to restrict their use to
  * the owner.
  */
-contract Ownable is Context {
+abstract contract Ownable is Context {
     address private _owner;
 
     event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
@@ -882,7 +1019,7 @@ contract Ownable is Context {
     /**
      * @dev Returns the address of the current owner.
      */
-    function owner() public view returns (address) {
+    function owner() public view virtual returns (address) {
         return _owner;
     }
 
@@ -890,7 +1027,7 @@ contract Ownable is Context {
      * @dev Throws if called by any account other than the owner.
      */
     modifier onlyOwner() {
-        require(_owner == _msgSender(), "Ownable: caller is not the owner");
+        require(owner() == _msgSender(), "Ownable: caller is not the owner");
         _;
     }
 
@@ -916,6 +1053,12 @@ contract Ownable is Context {
         _owner = newOwner;
     }
 }
+
+// File: @openzeppelin/contracts/GSN/Context.sol
+
+// SPDX-License-Identifier: MIT
+
+pragma solidity >=0.6.0 <0.8.0;
 
 // File: contracts/BEP20.sol
 
@@ -1291,7 +1434,7 @@ contract BEP20 is Context, IBEP20 {
     ) internal virtual {}
 }
 
-// File: contracts/BStableTokenV2.sol
+// File: contracts/BEP20Burnable.sol
 
 // SPDX-License-Identifier: MIT
 
@@ -1299,24 +1442,77 @@ pragma solidity ^0.6.0;
 
 
 
-// SushiToken with Governance.
-contract BStableTokenV2 is BEP20("BStable Token", "BST"), Ownable {
-
-    constructor() public {
-        transferOwnership(msg.sender);
+/**
+ * @dev Extension of {BEP20} that allows token holders to destroy both their own
+ * tokens and those that they have an allowance for, in a way that can be
+ * recognized off-chain (via event analysis).
+ */
+abstract contract BEP20Burnable is Context, BEP20 {
+    /**
+     * @dev Destroys `amount` tokens from the caller.
+     *
+     * See {BEP20-_burn}.
+     */
+    function burn(uint256 amount) public virtual {
+        _burn(_msgSender(), amount);
     }
 
-    /// @notice Creates `_amount` token to `_to`. Must only be called by the owner (MasterChef).
-    function mint(address _to, uint256 _amount) public onlyOwner {
+    /**
+     * @dev Destroys `amount` tokens from `account`, deducting from the caller's
+     * allowance.
+     *
+     * See {BEP20-_burn} and {BEP20-allowance}.
+     *
+     * Requirements:
+     *
+     * - the caller must have allowance for ``accounts``'s tokens of at least
+     * `amount`.
+     */
+    function burnFrom(address account, uint256 amount) public virtual {
+        uint256 decreasedAllowance = allowance(account, _msgSender()).sub(amount, "BEP20: burn amount exceeds allowance");
+
+        _approve(account, _msgSender(), decreasedAllowance);
+        _burn(account, amount);
+    }
+}
+
+// File: contracts/v2/BStableTokenV2.sol
+
+// SPDX-License-Identifier: MIT
+
+pragma solidity ^0.6.0;
+
+
+
+///@title BSTToken with Governance.
+contract BStableTokenV2 is
+    BEP20("BStable Token", "BST"),
+    BEP20Burnable,
+    Ownable
+{
+    address public minter;
+
+    uint256 public TOKENS_PER_INVESTOR = 1_000_000 ether;
+
+    constructor(
+        address owner,
+        address minter_,
+        address[] memory investors
+    ) public {
+        require(investors.length == 10, "only have 10 investor address");
+        transferOwnership(owner);
+        minter = minter_;
+        for (uint256 i = 0; i < 10; i++) {
+            _mint(investors[i], TOKENS_PER_INVESTOR);
+        }
+    }
+
+    /// @notice Creates `_amount` token to `_to`. Must only be called by the owner (BStableProxyV2).
+    function mint(address _to, uint256 _amount) public {
+        require(msg.sender == minter, "BStableTokenV2:only minter.");
         _mint(_to, _amount);
         _moveDelegates(address(0), _delegates[_to], _amount);
     }
-
-    // Copied and modified from YAM code:
-    // https://github.com/yam-finance/yam-protocol/blob/master/contracts/token/YAMGovernanceStorage.sol
-    // https://github.com/yam-finance/yam-protocol/blob/master/contracts/token/YAMGovernance.sol
-    // Which is copied and modified from COMPOUND:
-    // https://github.com/compound-finance/compound-protocol/blob/master/contracts/Governance/Comp.sol
 
     /// @notice A record of each accounts delegate
     mapping(address => address) internal _delegates;
@@ -1416,13 +1612,13 @@ contract BStableTokenV2 is BEP20("BStable Token", "BST"), Ownable {
         address signatory = ecrecover(digest, v, r, s);
         require(
             signatory != address(0),
-            "SUSHI::delegateBySig: invalid signature"
+            "BST::delegateBySig: invalid signature"
         );
         require(
             nonce == nonces[signatory]++,
-            "SUSHI::delegateBySig: invalid nonce"
+            "BST::delegateBySig: invalid nonce"
         );
-        require(now <= expiry, "SUSHI::delegateBySig: signature expired");
+        require(now <= expiry, "BST::delegateBySig: signature expired");
         return _delegate(signatory, delegatee);
     }
 
@@ -1451,7 +1647,7 @@ contract BStableTokenV2 is BEP20("BStable Token", "BST"), Ownable {
     {
         require(
             blockNumber < block.number,
-            "SUSHI::getPriorVotes: not yet determined"
+            "BST::getPriorVotes: not yet determined"
         );
 
         uint32 nCheckpoints = numCheckpoints[account];
@@ -1487,7 +1683,7 @@ contract BStableTokenV2 is BEP20("BStable Token", "BST"), Ownable {
 
     function _delegate(address delegator, address delegatee) internal {
         address currentDelegate = _delegates[delegator];
-        uint256 delegatorBalance = balanceOf(delegator); // balance of underlying SUSHIs (not scaled);
+        uint256 delegatorBalance = balanceOf(delegator); // balance of underlying BSTs (not scaled);
         _delegates[delegator] = delegatee;
 
         emit DelegateChanged(delegator, currentDelegate, delegatee);
@@ -1534,7 +1730,7 @@ contract BStableTokenV2 is BEP20("BStable Token", "BST"), Ownable {
         uint32 blockNumber =
             safe32(
                 block.number,
-                "SUSHI::_writeCheckpoint: block number exceeds 32 bits"
+                "BST::_writeCheckpoint: block number exceeds 32 bits"
             );
 
         if (
@@ -1569,10 +1765,9 @@ contract BStableTokenV2 is BEP20("BStable Token", "BST"), Ownable {
         }
         return chainId;
     }
-
 }
 
-// File: contracts/BStableProxyV2.sol
+// File: contracts/v2/BStableProxyV2.sol
 
 // SPDX-License-Identifier: MIT
 
@@ -1585,71 +1780,38 @@ pragma solidity ^0.6.0;
 
 
 
-// interface IMigratorChef {
-//     // Perform LP token migration from legacy UniswapV2 to SushiSwap.
-//     // Take the current LP token address and return the new LP token address.
-//     // Migrator should have full access to the caller's LP token.
-//     // Return the new LP token address.
-//     //
-//     // XXX Migrator must have allowance access to UniswapV2 LP tokens.
-//     // SushiSwap must mint EXACTLY the same amount of SushiSwap LP tokens or
-//     // else something bad will happen. Traditional UniswapV2 does not
-//     // do that so be careful!
-//     function migrate(IBEP20 token) external returns (IBEP20);
-// }
-
-// MasterChef is the master of Sushi. He can make Sushi and he is a fair guy.
-//
-// Note that it's ownable and the owner wields tremendous power. The ownership
-// will be transferred to a governance smart contract once SUSHI is sufficiently
-// distributed and the community can show to govern itself.
-//
-// Have fun reading it. Hopefully it's bug-free. God bless.
 contract BStableProxyV2 is Ownable {
     using SafeMath for uint256;
     using SafeBEP20 for IBEP20;
-    // Info of each user.
     struct UserInfo {
         uint256 amount; // How many LP tokens the user has provided.
         uint256 rewardDebt; // Reward debt. See explanation below.
-        //
-        // We do some fancy math here. Basically, any point in time, the amount of SUSHIs
-        // entitled to a user but is pending to be distributed is:
-        //
-        //   pending reward = (user.amount * pool.accSushiPerShare) - user.rewardDebt
-        //
-        // Whenever a user deposits or withdraws LP tokens to a pool. Here's what happens:
-        //   1. The pool's `accSushiPerShare` (and `lastRewardBlock`) gets updated.
-        //   2. User receives the pending reward sent to his/her address.
-        //   3. User's `amount` gets updated.
-        //   4. User's `rewardDebt` gets updated.
     }
     // Info of each pool.
     struct PoolInfo {
         IBEP20 lpToken; // Address of LP token contract.
-        uint256 allocPoint; // How many allocation points assigned to this pool. SUSHIs to distribute per block.
-        uint256 lastRewardBlock; // Last block number that SUSHIs distribution occurs.
-        uint256 accTokenPerShare; // Accumulated SUSHIs per share, times 1e12. See below.
+        uint256 allocPoint; // How many allocation points assigned to this pool. BSTs to distribute per block.
+        uint256 lastRewardBlock; // Last block number that BSTs distribution occurs.
+        uint256 accTokenPerShare; // Accumulated BSTs per share, times 1e12. See below.
     }
     BStableTokenV2 public token;
     // Dev address.
     address public devaddr;
-    // Block number when bonus SUSHI period ends.
+    // Block number when bonus BST period ends.
     uint256 public bonusEndBlock;
-    // SUSHI tokens created per block.
+    // BST tokens created per block.
     uint256 public tokenPerBlock;
     // Bonus muliplier for early token makers.
-    uint256 public constant BONUS_MULTIPLIER = 10;
-    // The migrator contract. It has a lot of power. Can only be set through governance (owner).
-    // IMigratorChef public migrator;
+    uint256 public constant BONUS_MULTIPLIER = 2;
     // Info of each pool.
     PoolInfo[] public poolInfo;
     // Info of each user that stakes LP tokens.
     mapping(uint256 => mapping(address => UserInfo)) public userInfo;
     // Total allocation poitns. Must be the sum of all allocation points in all pools.
     uint256 public totalAllocPoint = 0;
-    // The block number when SUSHI mining starts.
+    // The block number when BST mining starts.
     uint256 public startBlock;
+
     event Deposit(address indexed user, uint256 indexed pid, uint256 amount);
     event Withdraw(address indexed user, uint256 indexed pid, uint256 amount);
     event EmergencyWithdraw(
@@ -1663,9 +1825,10 @@ contract BStableProxyV2 is Ownable {
         uint256 _tokenPerBlock,
         uint256 _startBlock,
         uint256 _bonusEndBlock,
+        address[] memory investors,
         address ownerAddress
     ) public {
-        token = new BStableTokenV2();
+        token = new BStableTokenV2(ownerAddress, address(this), investors);
         devaddr = _devaddr;
         tokenPerBlock = _tokenPerBlock;
         bonusEndBlock = _bonusEndBlock;
@@ -1700,7 +1863,7 @@ contract BStableProxyV2 is Ownable {
         );
     }
 
-    // Update the given pool's SUSHI allocation point. Can only be called by the owner.
+    // Update the given pool's BST allocation point. Can only be called by the owner.
     function set(
         uint256 _pid,
         uint256 _allocPoint,
@@ -1714,23 +1877,6 @@ contract BStableProxyV2 is Ownable {
         );
         poolInfo[_pid].allocPoint = _allocPoint;
     }
-
-    // Set the migrator contract. Can only be called by the owner.
-    // function setMigrator(IMigratorChef _migrator) public onlyOwner {
-    //     migrator = _migrator;
-    // }
-
-    // Migrate lp token to another lp contract. Can be called by anyone. We trust that migrator contract is good.
-    // function migrate(uint256 _pid) public {
-    //     require(address(migrator) != address(0), "migrate: no migrator");
-    //     PoolInfo storage pool = poolInfo[_pid];
-    //     IBEP20 lpToken = pool.lpToken;
-    //     uint256 bal = lpToken.balanceOf(address(this));
-    //     lpToken.safeApprove(address(migrator), bal);
-    //     IBEP20 newLpToken = migrator.migrate(lpToken);
-    //     require(bal == newLpToken.balanceOf(address(this)), "migrate: bad");
-    //     pool.lpToken = newLpToken;
-    // }
 
     // Return reward multiplier over the given _from to _to block.
     function getMultiplier(uint256 _from, uint256 _to)
@@ -1750,7 +1896,7 @@ contract BStableProxyV2 is Ownable {
         }
     }
 
-    // View function to see pending SUSHIs on frontend.
+    // View function to see pending BSTs on frontend.
     function pendingReward(uint256 _pid, address _user)
         external
         view
@@ -1806,7 +1952,7 @@ contract BStableProxyV2 is Ownable {
         pool.lastRewardBlock = block.number;
     }
 
-    // Deposit LP tokens to MasterChef for SUSHI allocation.
+    // Deposit LP tokens to BStableProxyV2 for BST allocation.
     function deposit(uint256 _pid, uint256 _amount) public {
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][msg.sender];
@@ -1828,7 +1974,7 @@ contract BStableProxyV2 is Ownable {
         emit Deposit(msg.sender, _pid, _amount);
     }
 
-    // Withdraw LP tokens from MasterChef.
+    // Withdraw LP tokens from BStableProxyV2.
     function withdraw(uint256 _pid, uint256 _amount) public {
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][msg.sender];
@@ -1855,7 +2001,7 @@ contract BStableProxyV2 is Ownable {
         user.rewardDebt = 0;
     }
 
-    // Safe token transfer function, just in case if rounding error causes pool to not have enough SUSHIs.
+    // Safe token transfer function, just in case if rounding error causes pool to not have enough BSTs.
     function safeTokenTransfer(address _to, uint256 _amount) internal {
         uint256 tokenBal = token.balanceOf(address(this));
         if (_amount > tokenBal) {
@@ -1873,52 +2019,5 @@ contract BStableProxyV2 is Ownable {
 
     function getTokenAddress() external view returns (address) {
         return address(token);
-    }
-
-    function getPoolInfo(uint256 _pid)
-        public
-        view
-        returns (
-            address _poolAddress,
-            address[] memory _coins,
-            uint256 _allocPoint,
-            uint256 _accTokenPerShare,
-            uint256 _lastRewardBlock
-        )
-    {
-        _poolAddress = address(poolInfo[_pid].lpToken);
-        _coins = IBStablePool(_poolAddress).getCoins();
-        _allocPoint = poolInfo[_pid].allocPoint;
-        _accTokenPerShare = poolInfo[_pid].accTokenPerShare;
-        _lastRewardBlock = poolInfo[_pid].lastRewardBlock;
-    }
-
-    function getUserInfo(uint256 _pid, address user)
-        public
-        view
-        returns (uint256 _amount, uint256 _rewardDebt)
-    {
-        _amount = userInfo[_pid][user].amount;
-        _rewardDebt = userInfo[_pid][user].rewardDebt;
-    }
-
-    function getTotalAllocPoint() public view returns (uint256) {
-        return totalAllocPoint;
-    }
-
-    function getDevAddress() public view returns (address) {
-        return devaddr;
-    }
-
-    function getBonusEndBlock() public view returns (uint256) {
-        return bonusEndBlock;
-    }
-
-    function getTokenPerBlock() public view returns (uint256) {
-        return tokenPerBlock;
-    }
-
-    function getStartBlock() public view returns (uint256) {
-        return startBlock;
     }
 }

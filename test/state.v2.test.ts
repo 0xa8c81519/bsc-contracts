@@ -27,9 +27,11 @@ contract('BStable proxy', async accounts => {
     let btcb: StableCoinInstance;
     let renBtc: StableCoinInstance;
     let anyBtc: StableCoinInstance;
+    let usdc: StableCoinInstance;
     let bst: BStableTokenV2Instance;
     let p1: BStablePoolInstance;
     let p2: BStablePoolInstance;
+    let p3: BStablePoolInstance;
     let denominator = new BigNumber(10).exponentiatedBy(18);
 
 
@@ -37,8 +39,10 @@ contract('BStable proxy', async accounts => {
         proxyInstance = await proxyContract.at(config.proxyAddress);
         let p1Info = await proxyInstance.poolInfo(0);
         let p2Info = await proxyInstance.poolInfo(1);
+        let p3Info = await proxyInstance.poolInfo(2);
         p1 = await poolContract.at(p1Info[0]);
         p2 = await poolContract.at(p2Info[0]);
+        p3 = await poolContract.at(p3Info[0]);
         let coin = await p1.coins(0);
         dai = await stableCoinContract.at(coin);
         coin = await p1.coins(1);
@@ -51,6 +55,8 @@ contract('BStable proxy', async accounts => {
         renBtc = await stableCoinContract.at(coin);
         coin = await p2.coins(2);
         anyBtc = await stableCoinContract.at(coin);
+        coin = await p3.coins(0);
+        usdc = await stableCoinContract.at(coin);
         let tokenAddress = await proxyInstance.getTokenAddress();
         bst = await tokenContract.at(tokenAddress);
         console.log('======================================================');
@@ -159,6 +165,7 @@ contract('BStable proxy', async accounts => {
             console.log('renBtc: ' + renBtc.address);
             console.log('xbtc: ' + btcb.address);
             console.log('anyBtc: ' + anyBtc.address);
+            console.log('usdc: ' + usdc.address);
             console.log('Token address: ' + bst.address);
         }).timeout(3600 * 1000);
 

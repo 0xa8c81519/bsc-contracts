@@ -1,5 +1,5 @@
 const BStablePayment = artifacts.require("BStablePayment");
-const BStablePool = artifacts.require("BStablePool");
+const PaymentToken = artifacts.require("PaymentToken");
 
 module.exports = function (deployer, network, accounts) {
 
@@ -16,27 +16,17 @@ module.exports = function (deployer, network, accounts) {
     } else if (deployer.network_id == 1) { // main net
     } else if (deployer.network_id == 42) { // kovan
     } else if (deployer.network_id == 56) { // bsc main net
-        return BStablePool.deployed().then(pool => {
+        return PaymentToken.deployed().then(token => {
             return BStablePayment.deployed().then(payment => {
-                return payment.setPool(pool.address);
+                return payment.setPaymentToken(token.address);
             });
         });
-        //return BStablePool.at('').then(pool => {
-        //return     BStablePayment.at('').then(payment => {
-        //         return payment.setPool(pool.address);
-        //     });
-        // });
     } else if (deployer.network_id == 5777 || deployer.network_id == 97) { //dev or bsc_test
-        return BStablePool.deployed().then(pool => {
+        return PaymentToken.deployed().then(token => {
             return BStablePayment.deployed().then(payment => {
-                return payment.setPool(pool.address);
+                return payment.setPaymentToken(token.address);
             });
         });
-        //return BStablePool.at('').then(pool => {
-        //return     BStablePayment.at('').then(payment => {
-        //         return payment.setPool(pool.address);
-        //     });
-        // });
     } else {
 
     }

@@ -1,4 +1,5 @@
-const BStablePayment = artifacts.require("BStablePayment");
+const BStableProxyV2 = artifacts.require("BStableProxyV2");
+const BStablePool = artifacts.require("BStablePool");
 
 module.exports = function (deployer, network, accounts) {
 
@@ -15,21 +16,18 @@ module.exports = function (deployer, network, accounts) {
     } else if (deployer.network_id == 1) { // main net
     } else if (deployer.network_id == 42) { // kovan
     } else if (deployer.network_id == 56) { // bsc main net
-        let usdtAddress = '0x55d398326f99059ff775485246999027b3197955';
-        return BStablePayment.deployed().then(payment => {
-            return payment.addCoins(usdtAddress, 2);
+        return BStablePool.deployed().then(pool3 => {
+            return BStableProxyV2.deployed().then(proxy => {
+                return proxy.add(40, pool3.address, false);
+            });
         });
-        //return BStablePayment.at('').then(payment => {
-        //     return payment.addCoins(usdtAddress, 2);
-        // });
+
     } else if (deployer.network_id == 5777 || deployer.network_id == 97) { //dev or bsc_test
-        let usdtAddress = '0x55d398326f99059ff775485246999027b3197955';
-        return BStablePayment.deployed().then(payment => {
-            return payment.addCoins(usdtAddress, 2);
+        return  BStablePool.deployed().then(pool3 => {
+            return BStableProxyV2.deployed().then(proxy => {
+                return proxy.add(40, pool3.address, false);
+            });
         });
-        //return BStablePayment.at('').then(payment => {
-        //     return payment.addCoins(usdtAddress, 2);
-        // });
     } else {
 
     }

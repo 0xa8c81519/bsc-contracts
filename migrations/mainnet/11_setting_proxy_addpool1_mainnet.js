@@ -15,21 +15,15 @@ module.exports = function (deployer, network, accounts) {
     } else if (deployer.network_id == 1) { // main net
     } else if (deployer.network_id == 42) { // kovan
     } else if (deployer.network_id == 56) { // bsc main net
-        let _owner = '0xB0d88027F5dEd975fF6Df7A62952033D67Df277f';
+        let pool1 = '0x9c00954a8a58f5dda8c011d6233093763f13c8da';
         return BStableProxyV2.deployed().then(proxy => {
-            return proxy.transferOwnership(_owner);
+            return proxy.add(5, pool1, false);
         });
-        // BStableProxyV2.at('').then(proxy=>{
-        //     proxy.transferOwnership(_owner);
-        // });
     } else if (deployer.network_id == 5777 || deployer.network_id == 97) { //dev or bsc_test
-        let _owner = '0xB0d88027F5dEd975fF6Df7A62952033D67Df277f';
+        let pool1 = '0x7B095E6eaA969F9f840Ccacb9DE89516DE2FC52E';
         return BStableProxyV2.deployed().then(proxy => {
-            return proxy.transferOwnership(_owner);
+            return proxy.add(5, pool1, false);
         });
-        //return BStableProxyV2.at('').then(proxy=>{
-        //    return proxy.transferOwnership(_owner);
-        // });
     } else {
 
     }

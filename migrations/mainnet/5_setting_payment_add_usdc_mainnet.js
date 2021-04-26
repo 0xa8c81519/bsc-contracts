@@ -1,4 +1,3 @@
-const PaymentToken = artifacts.require("PaymentToken");
 const BStablePayment = artifacts.require("BStablePayment");
 
 module.exports = function (deployer, network, accounts) {
@@ -16,27 +15,15 @@ module.exports = function (deployer, network, accounts) {
     } else if (deployer.network_id == 1) { // main net
     } else if (deployer.network_id == 42) { // kovan
     } else if (deployer.network_id == 56) { // bsc main net
+        let usdcAddress = '0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d';
         return BStablePayment.deployed().then(payment => {
-            return PaymentToken.deployed().then(paymentToken => {
-                return paymentToken.setMinter(payment.address);
-            });
+            return payment.addCoins(usdcAddress, 0);
         });
-        // return BStablePayment.at('').then(payment => {
-        //     return PaymentToken.at('').then(paymentToken => {
-        //         return paymentToken.setMinter(payment.address);
-        //     });
-        // });
     } else if (deployer.network_id == 5777 || deployer.network_id == 97) { //dev or bsc_test
+        let usdcAddress = '0x45374DB08D851B9Fc254d9BF0e67E1607876a7E7';
         return BStablePayment.deployed().then(payment => {
-            return PaymentToken.deployed().then(paymentToken => {
-                return paymentToken.setMinter(payment.address);
-            });
+            return payment.addCoins(usdcAddress, 0);
         });
-        // return BStablePayment.at('').then(payment => {
-        //     return PaymentToken.at('').then(paymentToken => {
-        //         return paymentToken.setMinter(payment.address);
-        //     });
-        // });
     } else {
 
     }
