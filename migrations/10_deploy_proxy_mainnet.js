@@ -18,7 +18,6 @@ module.exports = function (deployer, network, accounts) {
         let dDay = new Date();
         dDay.setFullYear(2021, 4, 3); // May 3th 2021
         dDay.setHours(10, 0, 0, 0);
-        console.log(dDay);
         let now = new Date();
         let blocks = Math.floor((Math.floor(dDay.getTime() / 1000) - Math.floor(now.getTime() / 1000)) / 3);
         // todo: _dev address to get dev bst
@@ -26,9 +25,7 @@ module.exports = function (deployer, network, accounts) {
         return web3.eth.getBlock('latest').then(latestBlock => {
             // 2 bst per block
             let tokenPerBlock = web3.utils.toWei('2', 'ether');
-            // let startBlock = latestBlock.number + 60 / 3 * 60 * 24; // farming will start after 24h
-            // let startBlock = latestBlock.number + 60 / 3 * 60 * 12; // farming will start after 12h
-            let startBlock = latestBlock.number + blocks; // farming will start after 12h
+            let startBlock = latestBlock.number + blocks; // farming will start 
             let bonusPeriod = 60 / 3 * 60 * 24 * 180;// 180 days
             console.log('Bonus period(blocks): ' + bonusPeriod);
             let bonusEndBlock = startBlock + bonusPeriod; // one day, 1 block/3 sec
@@ -45,23 +42,27 @@ module.exports = function (deployer, network, accounts) {
                 '',
                 ''
             ];
-            return deployer.deploy(BStableProxyV2, _dev, tokenPerBlock, startBlock, bonusEndBlock, investors, accounts[0]);
+            return deployer.deploy(BStableProxyV2, _dev, tokenPerBlock, startBlock, bonusEndBlock, investors, accounts[0]).then(res => {
+                console.log('constructor[0]:' + _dev);
+                console.log('constructor[1]:' + tokenPerBlock);
+                console.log('constructor[2]:' + startBlock);
+                console.log('constructor[3]:' + bonusEndBlock);
+                console.log('constructor[4]:' + investors);
+                console.log('constructor[5]:' + accounts[0]);
+            });
         });
 
     } else if (deployer.network_id == 5777 || deployer.network_id == 97) { //dev or bsc_test
         let dDay = new Date();
         dDay.setFullYear(2021, 4, 3); // May 3th 2021
         dDay.setHours(10, 0, 0, 0);
-        console.log(dDay);
         let now = new Date();
         let blocks = Math.floor((Math.floor(dDay.getTime() / 1000) - Math.floor(now.getTime() / 1000)) / 3);
         let _dev = '0xB0d88027F5dEd975fF6Df7A62952033D67Df277f';
         return web3.eth.getBlock('latest').then(latestBlock => {
             // 2 bst per block
             let tokenPerBlock = web3.utils.toWei('2', 'ether');
-            // let startBlock = latestBlock.number + 60 / 3 * 60 * 24; // farming will start after 24h
-            // let startBlock = latestBlock.number + 60 / 3 * 60 * 12; // farming will start after 12h
-            let startBlock = latestBlock.number + blocks; // farming will start after 12h
+            let startBlock = latestBlock.number + blocks; // farming will start 
             let bonusPeriod = 60 / 3 * 60 * 24 * 180;// 180 days
             console.log('Bonus period(blocks): ' + bonusPeriod);
             let bonusEndBlock = startBlock + bonusPeriod; // one day, 1 block/3 sec
@@ -77,7 +78,14 @@ module.exports = function (deployer, network, accounts) {
                 '0xA04c97c1c00300CcfA230a1D1b4E8Dc241861A3e',
                 '0x76EFD6e0A9322a7b9dCA70a1972453814A5687c4'
             ];
-            return deployer.deploy(BStableProxyV2, _dev, tokenPerBlock, startBlock, bonusEndBlock, investors, accounts[0]);
+            return deployer.deploy(BStableProxyV2, _dev, tokenPerBlock, startBlock, bonusEndBlock, investors, accounts[0]).then(res => {
+                console.log('constructor[0]:' + _dev);
+                console.log('constructor[1]:' + tokenPerBlock);
+                console.log('constructor[2]:' + startBlock);
+                console.log('constructor[3]:' + bonusEndBlock);
+                console.log('constructor[4]:' + investors);
+                console.log('constructor[5]:' + accounts[0]);
+            });
         });
 
     } else {

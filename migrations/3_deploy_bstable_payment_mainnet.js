@@ -1,7 +1,7 @@
 const BStablePayment = artifacts.require("BStablePayment");
 
-module.exports =  function (deployer, network, accounts) {
-    
+module.exports = function (deployer, network, accounts) {
+
     if (deployer.network.indexOf('skipMigrations') > -1) { // skip migration
         return;
     }
@@ -16,11 +16,21 @@ module.exports =  function (deployer, network, accounts) {
     } else if (deployer.network_id == 42) { // kovan
     } else if (deployer.network_id == 56) { // bsc main net
         // after setting, then tranfer owner 
-        return deployer.deploy(BStablePayment, "BStable Payment Contract", "BSP-V1", accounts[0]).then(res => {
+        let name = "BStable Payment Contract";
+        let symbol = "BSP-V1";
+        return deployer.deploy(BStablePayment, name, symbol, accounts[0]).then(res => {
+            console.log('constructor[0]:' + name);
+            console.log('constructor[1]:' + symbol);
+            console.log('constructor[2]:' + accounts[0]);
         });
     } else if (deployer.network_id == 5777 || deployer.network_id == 97) { //dev or bsc_test
         // after setting, then tranfer owner 
-        return deployer.deploy(BStablePayment, "BStable Payment Contract", "BSP-V1", accounts[0]).then(res => {
+        let name = "BStable Payment Contract";
+        let symbol = "BSP-V1";
+        return deployer.deploy(BStablePayment, name, symbol, accounts[0]).then(res => {
+            console.log('constructor[0]:' + name);
+            console.log('constructor[1]:' + symbol);
+            console.log('constructor[2]:' + accounts[0]);
         });
     } else {
 

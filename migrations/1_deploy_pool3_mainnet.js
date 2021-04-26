@@ -1,7 +1,7 @@
 const BStablePool = artifacts.require("BStablePool");
 
 module.exports = function (deployer, network, accounts) {
-    
+
     if (deployer.network.indexOf('skipMigrations') > -1) { // skip migration
         return;
     }
@@ -23,8 +23,16 @@ module.exports = function (deployer, network, accounts) {
         let A = 1000;
         let fee = '30000000'; // 0.003
         let adminFee = '6666666667'; // 2/3
-        return deployer.deploy(BStablePool, "BStable Pool (USDC / BUSD / USDT)", "BSLP-03", stableCoins, A, fee, adminFee, _owner).then(res => {
-            console.log('Pool3\'s address: ' + BStablePool.address);
+        let name = "BStable Pool (USDC / BUSD / USDT)";
+        let symbol = "BSLP-03";
+        return deployer.deploy(BStablePool, name, symbol, stableCoins, A, fee, adminFee, _owner).then(res => {
+            console.log('constructor[0]:' + name);
+            console.log('constructor[1]:' + symbol);
+            console.log('constructor[2]:' + stableCoins);
+            console.log('constructor[3]:' + A);
+            console.log('constructor[4]:' + fee);
+            console.log('constructor[5]:' + adminFee);
+            console.log('constructor[6]:' + _owner);
         });
     } else if (deployer.network_id == 5777 || deployer.network_id == 97) { //dev or bsc_test
         let usdcAddress = '0x45374DB08D851B9Fc254d9BF0e67E1607876a7E7';
@@ -35,8 +43,16 @@ module.exports = function (deployer, network, accounts) {
         let A = 1000;
         let fee = '30000000'; // 0.003
         let adminFee = '6666666667'; // 2/3
-        return deployer.deploy(BStablePool, "BStable Pool (USDC / BUSD / USDT)", "BSLP-03", stableCoins, A, fee, adminFee, _owner).then(res => {
-            console.log('Pool3\'s address: ' + BStablePool.address);
+        let name = "BStable Pool (USDC / BUSD / USDT)";
+        let symbol = "BSLP-03";
+        return deployer.deploy(BStablePool, name, symbol, stableCoins, A, fee, adminFee, _owner).then(res => {
+            console.log('constructor[0]:' + name);
+            console.log('constructor[1]:' + symbol);
+            console.log('constructor[2]:' + stableCoins);
+            console.log('constructor[3]:' + A);
+            console.log('constructor[4]:' + fee);
+            console.log('constructor[5]:' + adminFee);
+            console.log('constructor[6]:' + _owner);
         });
     } else {
 
