@@ -1,4 +1,4 @@
-const BStablePayment = artifacts.require("BStablePayment");
+const BStablePool = artifacts.require("BStablePool");
 const data = require('./conf');
 
 module.exports = function (deployer, network, accounts) {
@@ -10,9 +10,9 @@ module.exports = function (deployer, network, accounts) {
     } else {
         return;
     }
-    let usdcAddress = config.usdc;
-    return BStablePayment.deployed().then(payment => {
-        return payment.addCoins(usdcAddress, 0);
+    let _owner = config.owner;
+    return BStablePool.deployed().then(pool => {
+        pool.transferOwnership(_owner);
     });
 
 };

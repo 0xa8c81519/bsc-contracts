@@ -30,4 +30,8 @@ contract BSTToken is DelegateBEP20, Ownable {
         require(msg.sender == minter, "BStableTokenV2:only minter.");
         _mint(_to, _amount);
     }
+
+    function transferMinterTo(address to) public onlyOwner {
+        minter = to;
+    }
 }

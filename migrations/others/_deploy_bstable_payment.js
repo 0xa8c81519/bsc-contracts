@@ -1,5 +1,5 @@
 const BStablePayment = artifacts.require("BStablePayment");
-const data = require('./conf');
+const data = require('../conf');
 
 module.exports = function (deployer, network, accounts) {
     let config;

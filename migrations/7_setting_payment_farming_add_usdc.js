@@ -1,4 +1,4 @@
-const BStablePayment = artifacts.require("BStablePayment");
+const PaymentFarmingProxy = artifacts.require("PaymentFarmingProxy");
 const data = require('./conf');
 
 module.exports = function (deployer, network, accounts) {
@@ -10,9 +10,9 @@ module.exports = function (deployer, network, accounts) {
     } else {
         return;
     }
-    let busdAddress = config.busd;
-    return BStablePayment.deployed().then(payment => {
-        return payment.addCoins(busdAddress, 1);
+    let usdcAddress = config.usdc;
+    return PaymentFarmingProxy.deployed().then(payment => {
+        return payment.addCoins(usdcAddress, 0);
     });
 
 };

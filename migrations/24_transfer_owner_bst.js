@@ -1,4 +1,4 @@
-const BStableProxyV2 = artifacts.require("BStableProxyV2");
+const BSTToken = artifacts.require("BSTToken");
 const data = require('./conf');
 
 module.exports = function (deployer, network, accounts) {
@@ -11,8 +11,8 @@ module.exports = function (deployer, network, accounts) {
         return;
     }
     let _owner = config.owner;
-    return BStableProxyV2.deployed().then(proxy => {
-        return proxy.transferOwnership(_owner);
+    return BSTToken.deployed().then(bst => {
+        bst.transferOwnership(_owner);
     });
 
 };

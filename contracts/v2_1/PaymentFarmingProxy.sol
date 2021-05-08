@@ -30,7 +30,7 @@ contract PaymentFarmingProxy is BEP20, Ownable {
 
     mapping(address => UserInfo) public userInfo;
 
-    uint256 totalQuantity;
+    uint256 public totalQuantity;
 
     IBStableToken token;
 
@@ -61,7 +61,7 @@ contract PaymentFarmingProxy is BEP20, Ownable {
         paymentFee = _fee;
     }
 
-    function setBSTMinter(IBSTMinter _minter) public onlyOwner {
+    function setMinter(IBSTMinter _minter) public onlyOwner {
         bstMinter = _minter;
     }
 

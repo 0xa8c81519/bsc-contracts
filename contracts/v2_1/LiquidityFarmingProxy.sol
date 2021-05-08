@@ -47,7 +47,7 @@ contract LiquidityFarmingProxy is Ownable {
         transferOwnership(ownerAddress);
     }
 
-    function setBSTMinter(IBSTMinter _minter) public onlyOwner {
+    function setMinter(IBSTMinter _minter) public onlyOwner {
         bstMinter = _minter;
     }
 

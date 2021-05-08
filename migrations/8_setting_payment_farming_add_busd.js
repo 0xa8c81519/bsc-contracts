@@ -1,4 +1,4 @@
-const PaymentToken = artifacts.require("PaymentToken");
+const PaymentFarmingProxy = artifacts.require("PaymentFarmingProxy");
 const data = require('./conf');
 
 module.exports = function (deployer, network, accounts) {
@@ -10,9 +10,9 @@ module.exports = function (deployer, network, accounts) {
     } else {
         return;
     }
-    let _owner = config.owner;
-    return PaymentToken.deployed().then(payment => {
-        return payment.transferOwnership(_owner);
+    let busdAddress = config.busd;
+    return PaymentFarmingProxy.deployed().then(payment => {
+        return payment.addCoins(busdAddress, 1);
     });
 
 };

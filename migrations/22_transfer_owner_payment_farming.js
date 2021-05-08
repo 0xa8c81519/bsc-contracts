@@ -1,4 +1,4 @@
-const BStableProxyV2 = artifacts.require("BStableProxyV2");
+const PaymentFarmingProxy = artifacts.require("PaymentFarmingProxy");
 const data = require('./conf');
 
 module.exports = function (deployer, network, accounts) {
@@ -10,9 +10,9 @@ module.exports = function (deployer, network, accounts) {
     } else {
         return;
     }
-    let pool1 = config.pool1;
-    return BStableProxyV2.deployed().then(proxy => {
-        return proxy.add(5, pool1, false);
+    let _owner = config.owner;
+    return PaymentFarmingProxy.deployed().then(proxy => {
+        proxy.transferOwnership(_owner);
     });
 
 };

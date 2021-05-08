@@ -1,4 +1,4 @@
-const BStableProxyV2 = artifacts.require("BStableProxyV2");
+const BSTMinter = artifacts.require("BSTMinter");
 const data = require('./conf');
 
 module.exports = function (deployer, network, accounts) {
@@ -10,9 +10,9 @@ module.exports = function (deployer, network, accounts) {
     } else {
         return;
     }
-    let pool2 = config.pool2;
-    return BStableProxyV2.deployed().then(proxy => {
-        return proxy.add(5, pool2, false);
+    let _owner = config.owner;
+    return BSTMinter.deployed().then(minter => {
+        minter.transferOwnership(_owner);
     });
 
 };
