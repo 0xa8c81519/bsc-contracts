@@ -11,8 +11,6 @@ interface IBSTMinter {
 
     function setHalvingPeriod(uint256 _block) external;
 
-    function proxyLength() external view returns (uint256);
-
     function add(
         uint256 _allocPoint,
         address _farmingProxy,
@@ -20,7 +18,7 @@ interface IBSTMinter {
     ) external;
 
     function set(
-        uint256 _pid,
+        address _pid,
         uint256 _allocPoint,
         bool _withUpdate
     ) external;
@@ -29,12 +27,12 @@ interface IBSTMinter {
 
     function phase() external view returns (uint256);
 
-    function getReward(uint256 _pid) external view returns (uint256);
+    function getReward(address _pid) external view returns (uint256);
 
-    function massUpdateProxys() external;
+    function massMint() external;
 
-    function updateProxy(
-        uint256 _pid,
+    function mint(
+        address _pid,
         uint256 _allocPoint,
         uint256 _totalPoints
     ) external returns (uint256);

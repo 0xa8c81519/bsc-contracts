@@ -6,8 +6,8 @@ import "../BEP20Burnable.sol";
 import "../DelegateBEP20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-///@title BSTToken with Governance.
-contract BStableTokenV2_1 is DelegateBEP20, Ownable {
+/// @title BSTToken with Governance.
+contract BSTToken is DelegateBEP20, Ownable {
     address public minter;
 
     uint256 public TOKENS_PER_INVESTOR = 1_000_000 ether;

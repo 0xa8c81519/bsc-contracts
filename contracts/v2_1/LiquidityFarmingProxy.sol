@@ -8,30 +8,31 @@ import "../interfaces/IBSTMinter.sol";
 import "../lib/SafeBEP20.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "./BStableTokenV2_1.sol";
+import "./BSTToken.sol";
 
-contract BStableProxyV2_1 is Ownable {
+/// @title Implement liquitidy farming.
+contract LiquidityFarmingProxy is Ownable {
     using SafeMath for uint256;
     using SafeBEP20 for IBEP20;
     struct UserInfo {
-        uint256 amount; // How many LP tokens the user has provided.
-        uint256 rewardDebt; // Reward debt. See explanation below.
+        uint256 amount; /// @dev How many LP tokens the user has provided.
+        uint256 rewardDebt; /// @dev Reward debt. See explanation below.
     }
-    // Info of each pool.
+    /// @notice Info of each pool.
     struct PoolInfo {
-        IBEP20 lpToken; // Address of LP token contract.
-        uint256 allocPoint; // How many allocation points assigned to this pool. BSTs to distribute per block.
-        uint256 lastRewardBlock; // Last block number that BSTs distribution occurs.
-        uint256 accTokenPerShare; // Accumulated BSTs per share, times 1e12. See below.
+        IBEP20 lpToken; /// @dev Address of LP token contract.
+        uint256 allocPoint; /// @dev How many allocation points assigned to this pool. BSTs to distribute per block.
+        uint256 lastRewardBlock; /// @dev Last block number that BSTs distribution occurs.
+        uint256 accTokenPerShare; /// @dev Accumulated BSTs per share, times 1e12. See below.
     }
     IBStableToken public token;
-    // Info of each pool.
+    /// @notice Info of each pool.
     PoolInfo[] public poolInfo;
-    // Info of each user that stakes LP tokens.
+    /// @notice Info of each user that stakes LP tokens.
     mapping(uint256 => mapping(address => UserInfo)) public userInfo;
-    // Total allocation poitns. Must be the sum of all allocation points in all pools.
+    /// @notice Total allocation poitns. Must be the sum of all allocation points in all pools.
     uint256 public totalAllocPoint = 0;
-
+    /// @notice For mint BST
     IBSTMinter bstMinter;
 
     event Deposit(address indexed user, uint256 indexed pid, uint256 amount);
@@ -54,8 +55,7 @@ contract BStableProxyV2_1 is Ownable {
         return poolInfo.length;
     }
 
-    // Add a new lp to the pool. Can only be called by the owner.
-    // XXX DO NOT add the same LP token more than once. Rewards will be messed up if you do.
+    /// @notice Add a new lp to the pool. Can only be called by the owner.
     function add(
         uint256 _allocPoint,
         IBEP20 _lpToken,
@@ -79,7 +79,7 @@ contract BStableProxyV2_1 is Ownable {
         );
     }
 
-    // Update the given pool's BST allocation point. Can only be called by the owner.
+    /// @notice Update the given pool's BST allocation point. Can only be called by the owner.
     function set(
         uint256 _pid,
         uint256 _allocPoint,
@@ -94,7 +94,7 @@ contract BStableProxyV2_1 is Ownable {
         poolInfo[_pid].allocPoint = _allocPoint;
     }
 
-    // View function to see pending BSTs on frontend.
+    /// @notice View function to see pending BSTs on frontend.
     function pendingReward(uint256 _pid, address _user)
         external
         view
@@ -106,7 +106,7 @@ contract BStableProxyV2_1 is Ownable {
         uint256 lpSupply = pool.lpToken.balanceOf(address(this));
         if (block.number > pool.lastRewardBlock && lpSupply != 0) {
             uint256 tokenReward =
-                bstMinter.getReward(0).mul(pool.allocPoint).div(
+                bstMinter.getReward(address(this)).mul(pool.allocPoint).div(
                     totalAllocPoint
                 ); // 0 is lp farming
             accTokenPerShare = accTokenPerShare.add(
@@ -116,7 +116,7 @@ contract BStableProxyV2_1 is Ownable {
         return user.amount.mul(accTokenPerShare).div(1e12).sub(user.rewardDebt);
     }
 
-    // Update reward vairables for all pools. Be careful of gas spending!
+    /// @notice Update reward vairables for all pools. Be careful of gas spending!
     function massUpdatePools() public {
         uint256 length = poolInfo.length;
         for (uint256 pid = 0; pid < length; ++pid) {
@@ -124,7 +124,7 @@ contract BStableProxyV2_1 is Ownable {
         }
     }
 
-    // Update reward variables of the given pool to be up-to-date.
+    /// @notice Update reward variables of the given pool to be up-to-date.
     function updatePool(uint256 _pid) public {
         PoolInfo storage pool = poolInfo[_pid];
         if (block.number <= pool.lastRewardBlock) {
@@ -136,14 +136,14 @@ contract BStableProxyV2_1 is Ownable {
             return;
         }
         uint256 tokenReward =
-            bstMinter.updateProxy(0, pool.allocPoint, totalAllocPoint);
+            bstMinter.mint(address(this), pool.allocPoint, totalAllocPoint);
         pool.accTokenPerShare = pool.accTokenPerShare.add(
             tokenReward.mul(1e12).div(lpSupply)
         );
         pool.lastRewardBlock = block.number;
     }
 
-    // Deposit LP tokens to BStableProxyV2 for BST allocation.
+    /// @notice Deposit LP tokens to BStableProxyV2 for BST allocation.
     function deposit(uint256 _pid, uint256 _amount) public {
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][msg.sender];
@@ -165,7 +165,7 @@ contract BStableProxyV2_1 is Ownable {
         emit Deposit(msg.sender, _pid, _amount);
     }
 
-    // Withdraw LP tokens from BStableProxyV2.
+    /// @notice Withdraw LP tokens .
     function withdraw(uint256 _pid, uint256 _amount) public {
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][msg.sender];
@@ -182,7 +182,7 @@ contract BStableProxyV2_1 is Ownable {
         emit Withdraw(msg.sender, _pid, _amount);
     }
 
-    // Withdraw without caring about rewards. EMERGENCY ONLY.
+    /// @notice Withdraw without caring about rewards. EMERGENCY ONLY.
     function emergencyWithdraw(uint256 _pid) public {
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][msg.sender];
@@ -192,7 +192,7 @@ contract BStableProxyV2_1 is Ownable {
         user.rewardDebt = 0;
     }
 
-    // Safe token transfer function, just in case if rounding error causes pool to not have enough BSTs.
+    /// @notice Safe token transfer function, just in case if rounding error causes pool to not have enough BSTs.
     function safeTokenTransfer(address _to, uint256 _amount) internal {
         uint256 tokenBal = token.balanceOf(address(this));
         if (_amount > tokenBal) {

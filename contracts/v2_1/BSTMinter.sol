@@ -7,43 +7,43 @@ import "../interfaces/IBEP20.sol";
 import "../interfaces/IBStableToken.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "./BStableTokenV2_1.sol";
+import "./BSTToken.sol";
 
+/// @title Implement BST's distrubution plan.
 contract BSTMinter is Ownable {
     using SafeMath for uint256;
     using SafeBEP20 for IBEP20;
 
-    // Info of each proxy.
+    /// @notice Info of each proxy.
     struct ProxyInfo {
-        address farmingProxy; // Address of farming contract.
-        uint256 allocPoint; // How many allocation points assigned to this proxy. BSTs to distribute per block.
-        uint256 lastRewardBlock; // Last block number that BSTs distribution occurs.
+        address farmingProxy; /// @dev Address of farming contract.
+        uint256 allocPoint; /// @dev How many allocation points assigned to this proxy. BSTs to distribute per block.
+        uint256 lastRewardBlock; /// @dev Last block number that BSTs distribution occurs.
     }
     IBStableToken public token;
-    // Dev address.
+    /// @notice Dev address.
     address public devaddr;
-    // Block number when bonus BST period ends.
-    uint256 public bonusEndBlock;
-    // BST tokens created per block.
+    /// @notice BST tokens created per block.
     uint256 public tokenPerBlock = 6_500_000_000_000_000_000; // 6.5 bst/block
-    // Info of each proxy.
-    ProxyInfo[] public proxyInfo;
-    // Total allocation poitns. Must be the sum of all allocation points in all proxys.
+    /// @notice Info of each proxy.
+    mapping(address => ProxyInfo) public proxyInfo;
+    // @notice Save proxy's address in array.
+    address[] public proxyAddresses;
+    /// @notice Total allocation poitns. Must be the sum of all allocation points in all proxys.
     uint256 public totalAllocPoint = 0;
-    // The block number when BST mining starts.
+    /// @notice The block number when BST mining starts.
     uint256 startBlock;
-
+    /// @notice Halving Period in blocks.
     uint256 public halvingPeriod = 2_628_000;
+    /// @notice Halving coefficient.
     uint256 public HALVING_COEFFICIENT = 1_189_207_115_002_721_024;
 
     constructor(
         address _devaddr,
         uint256 _startBlock,
-        uint256 _bonusEndBlock,
         address ownerAddress
     ) public {
         devaddr = _devaddr;
-        bonusEndBlock = _bonusEndBlock;
         startBlock = _startBlock;
         transferOwnership(ownerAddress);
     }
@@ -56,45 +56,45 @@ contract BSTMinter is Ownable {
         halvingPeriod = _block;
     }
 
-    function proxyLength() external view returns (uint256) {
-        return proxyInfo.length;
-    }
-
-    // Add a new lp to the proxy. Can only be called by the owner.
-    // XXX DO NOT add the same LP token more than once. Rewards will be messed up if you do.
+    /// @notice Add a new proxy. Can only be called by the owner.
+    /// @param _allocPoint Proxy's allocation's weight.
+    /// @param _farmingProxy Proxy contract's address.
+    /// @param _withUpdate Need mint BST
     function add(
         uint256 _allocPoint,
         address _farmingProxy,
         bool _withUpdate
     ) public onlyOwner {
         if (_withUpdate) {
-            massUpdateProxys();
+            massMint();
         }
         uint256 lastRewardBlock =
             block.number > startBlock ? block.number : startBlock;
         totalAllocPoint = totalAllocPoint.add(_allocPoint);
-        proxyInfo.push(
-            ProxyInfo({
-                farmingProxy: _farmingProxy,
-                allocPoint: _allocPoint,
-                lastRewardBlock: lastRewardBlock
-            })
-        );
+        proxyInfo[_farmingProxy] = ProxyInfo({
+            farmingProxy: _farmingProxy,
+            allocPoint: _allocPoint,
+            lastRewardBlock: lastRewardBlock
+        });
+        proxyAddresses.push(_farmingProxy);
     }
 
-    // Update the given proxy's BST allocation point. Can only be called by the owner.
+    /// @notice Update the given proxy's BST allocation point. Can only be called by the owner.
+    /// @param _proxyAddress Proxy contract's address.
+    /// @param _allocPoint Proxy's allocation's weight.
+    /// @param _withUpdate Need mint BST
     function set(
-        uint256 _pid,
+        address _proxyAddress,
         uint256 _allocPoint,
         bool _withUpdate
     ) public onlyOwner {
         if (_withUpdate) {
-            massUpdateProxys();
+            massMint();
         }
-        totalAllocPoint = totalAllocPoint.sub(proxyInfo[_pid].allocPoint).add(
-            _allocPoint
-        );
-        proxyInfo[_pid].allocPoint = _allocPoint;
+        totalAllocPoint = totalAllocPoint
+            .sub(proxyInfo[_proxyAddress].allocPoint)
+            .add(_allocPoint);
+        proxyInfo[_proxyAddress].allocPoint = _allocPoint;
     }
 
     /// @notice At what phase
@@ -113,10 +113,10 @@ contract BSTMinter is Ownable {
     }
 
     /// @notice Get proxy's amount of total reward
-    /// @param _pid the proxy's index.
+    /// @param _proxyAddress the proxy's address.
     /// @return return the amount of bst should be mint.
-    function getReward(uint256 _pid) public view returns (uint256) {
-        ProxyInfo storage proxy = proxyInfo[_pid];
+    function getReward(address _proxyAddress) public view returns (uint256) {
+        ProxyInfo storage proxy = proxyInfo[_proxyAddress];
         if (block.number <= proxy.lastRewardBlock) {
             return 0;
         }
@@ -126,14 +126,19 @@ contract BSTMinter is Ownable {
         );
         uint256 _lastRewardBlock = proxy.lastRewardBlock;
         uint256 blockReward = 0;
-        uint256 n = phase(_lastRewardBlock);
-        uint256 m = phase(block.number);
+        uint256 _lastPhase = phase(_lastRewardBlock);
+        uint256 _currPhase = phase(block.number);
         uint256 _bstPerBlock = tokenPerBlock;
+        uint256 i = 0;
+        while (i <= _lastPhase) {
+            _bstPerBlock = _bstPerBlock.mul(10**18).div(HALVING_COEFFICIENT);
+            i++;
+        }
         // If it crosses the cycle
-        while (n < m) {
-            n++;
+        while (_lastPhase < _currPhase) {
+            _lastPhase++;
             // Get the last block of the previous cycle
-            uint256 r = n.mul(halvingPeriod).add(startBlock);
+            uint256 r = _lastPhase.mul(halvingPeriod).add(startBlock);
             _bstPerBlock = _bstPerBlock.mul(10**18).div(HALVING_COEFFICIENT);
             // Get rewards from previous periods
             blockReward = blockReward.add(
@@ -154,17 +159,20 @@ contract BSTMinter is Ownable {
         return blockReward;
     }
 
-    // Update reward vairables for all proxys. Be careful of gas spending!
-    function massUpdateProxys() public {
-        uint256 length = proxyInfo.length;
+    /// @notice Update reward vairables for all proxys. Be careful of gas spending!
+    function massMint() public {
+        uint256 length = proxyAddresses.length;
         for (uint256 pid = 0; pid < length; ++pid) {
-            updateProxy(pid, 1, 1);
+            mint(proxyAddresses[pid], 1, 1);
         }
     }
 
-    /// @notice Update reward variables of the given proxy to be up-to-date.
-    function updateProxy(
-        uint256 _pid,
+    /// @notice mint bst according options
+    /// @param _pid proxy's address
+    /// @param _allocPoint additional weight from external.
+    /// @param _totalAllocPoint additional total weight from external.
+    function mint(
+        address _pid,
         uint256 _allocPoint,
         uint256 _totalAllocPoint
     ) public returns (uint256) {
@@ -180,7 +188,7 @@ contract BSTMinter is Ownable {
         return tokenReward;
     }
 
-    // Update dev address by the previous dev.
+    /// @notice Update dev address by the previous dev.
     function dev(address _devaddr) public onlyOwner {
         devaddr = _devaddr;
     }

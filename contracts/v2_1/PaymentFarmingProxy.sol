@@ -11,7 +11,8 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "../BEP20.sol";
 import "../lib/TransferHelper.sol";
 
-contract BStablePaymentV2_1 is BEP20, Ownable {
+/// @title Implement Payment and payment farming.
+contract PaymentFarmingProxy is BEP20, Ownable {
     using SafeMath for uint256;
 
     IBStablePool public pool;
@@ -72,11 +73,13 @@ contract BStablePaymentV2_1 is BEP20, Ownable {
         token = _token;
     }
 
+    /// @notice Add coins supported.
     function addCoins(address _coin, uint32 index) public onlyOwner {
         require(!coins[_coin].available, "Payment: coins dumplicated.");
         coins[_coin] = CoinInfo({index: index, available: true});
     }
 
+    /// @notice Remove coins from supported.
     function removeCoins(address _coin) public onlyOwner {
         require(coins[_coin].available == true, "Payment: coin no exists.");
         coins[_coin].available = false;
@@ -86,6 +89,7 @@ contract BStablePaymentV2_1 is BEP20, Ownable {
         pool = _pool;
     }
 
+    /// @notice Only pay, no need swap.
     function pay(
         address receiptToken,
         address receipt,
@@ -95,7 +99,7 @@ contract BStablePaymentV2_1 is BEP20, Ownable {
             amt <= IBEP20(receiptToken).balanceOf(msg.sender),
             "Payment: insufficient balance."
         );
-        bstMinter.updateProxy(1, 1, 1);
+        bstMinter.mint(address(this), 1, 1);
         uint256 fee = amt.mul(paymentFee).div(10**18);
         TransferHelper.safeTransferFrom(
             receiptToken,
@@ -116,6 +120,7 @@ contract BStablePaymentV2_1 is BEP20, Ownable {
         emit Pay(receiptToken, receiptToken, msg.sender, receipt);
     }
 
+    /// @notice Pay, and use swap.
     function payWithSwap(
         address payToken,
         address receiptToken,
@@ -124,7 +129,7 @@ contract BStablePaymentV2_1 is BEP20, Ownable {
         address receipt
     ) external {
         require(payToken != receiptToken, "Payment: the same token.");
-        bstMinter.updateProxy(1, 1, 1);
+        bstMinter.mint(address(this), 1, 1);
         uint256 i = coins[payToken].index;
         uint256 j = coins[receiptToken].index;
         TransferHelper.safeTransferFrom(
@@ -153,12 +158,12 @@ contract BStablePaymentV2_1 is BEP20, Ownable {
         emit Pay(payToken, receiptToken, msg.sender, receipt);
     }
 
-    // The user withdraws all the payment rewards
+    /// @notice The user withdraws all the payment rewards
     function withdrawReward() public {
         UserInfo storage user = userInfo[msg.sender];
         uint256 _quantity = user.quantity;
         require(user.quantity > 0, "Payment: no payment quantity.");
-        bstMinter.updateProxy(1, 1, 1);
+        bstMinter.mint(address(this), 1, 1);
         uint256 userReward =
             token.balanceOf(address(this)).mul(_quantity).div(totalQuantity);
         user.quantity = 0;
@@ -167,7 +172,7 @@ contract BStablePaymentV2_1 is BEP20, Ownable {
         totalQuantity = totalQuantity.sub(_quantity);
     }
 
-    // Get rewards from users in the current pool
+    /// @notice Get rewards from users in the current pool
     function getUserReward() public view returns (uint256) {
         UserInfo storage user = userInfo[msg.sender];
         uint256 _quantity = user.quantity;
