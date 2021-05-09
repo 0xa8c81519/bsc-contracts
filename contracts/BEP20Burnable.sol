@@ -10,7 +10,7 @@ import "./BEP20.sol";
  * tokens and those that they have an allowance for, in a way that can be
  * recognized off-chain (via event analysis).
  */
-abstract contract BEP20Burnable is Context, BEP20 {
+abstract contract BEP20Burnable is BEP20 {
     /**
      * @dev Destroys `amount` tokens from the caller.
      *

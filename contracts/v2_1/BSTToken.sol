@@ -25,9 +25,9 @@ contract BSTToken is DelegateBEP20, Ownable {
         }
     }
 
-    /// @notice Creates `_amount` token to `_to`. Must only be called by the owner (BStableProxyV2).
+    /// @notice Creates `_amount` token to `_to`. Must only be called by the owner .
     function mint(address _to, uint256 _amount) public {
-        require(msg.sender == minter, "BStableTokenV2:only minter.");
+        require(msg.sender == minter, "BSTToken:only minter.");
         _mint(_to, _amount);
     }
 

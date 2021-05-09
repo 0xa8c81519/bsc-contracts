@@ -4,7 +4,7 @@ pragma solidity ^0.6.0;
 
 import "../lib/SafeBEP20.sol";
 import "../interfaces/IBEP20.sol";
-import "../interfaces/IBStableToken.sol";
+import "../interfaces/IBSTToken.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./BSTToken.sol";
@@ -20,7 +20,7 @@ contract BSTMinter is Ownable {
         uint256 allocPoint; /// @dev How many allocation points assigned to this proxy. BSTs to distribute per block.
         uint256 lastRewardBlock; /// @dev Last block number that BSTs distribution occurs.
     }
-    IBStableToken public token;
+    IBSTToken public bstToken;
     /// @notice Dev address.
     address public devaddr;
     /// @notice BST tokens created per block.
@@ -34,7 +34,7 @@ contract BSTMinter is Ownable {
     /// @notice The block number when BST mining starts.
     uint256 startBlock;
     /// @notice Halving Period in blocks.
-    uint256 public halvingPeriod = 2_628_000;
+    uint256 public halvingPeriod = 7200;
     /// @notice Halving coefficient.
     uint256 public HALVING_COEFFICIENT = 1_189_207_115_002_721_024;
 
@@ -48,8 +48,8 @@ contract BSTMinter is Ownable {
         transferOwnership(ownerAddress);
     }
 
-    function setToken(IBStableToken _token) public onlyOwner {
-        token = _token;
+    function setToken(IBSTToken _token) public onlyOwner {
+        bstToken = _token;
     }
 
     function setHalvingPeriod(uint256 _block) public onlyOwner {
@@ -97,8 +97,7 @@ contract BSTMinter is Ownable {
         proxyInfo[_proxyAddress].allocPoint = _allocPoint;
     }
 
-    /// @notice At what phase
-    function phase(uint256 blockNumber) public view returns (uint256) {
+    function _phase(uint256 blockNumber) internal view returns (uint256) {
         if (halvingPeriod == 0) {
             return 0;
         }
@@ -108,8 +107,9 @@ contract BSTMinter is Ownable {
         return 0;
     }
 
+    /// @notice At what phase
     function phase() public view returns (uint256) {
-        return phase(block.number);
+        return _phase(block.number);
     }
 
     /// @notice Get proxy's amount of total reward
@@ -120,16 +120,12 @@ contract BSTMinter is Ownable {
         if (block.number <= proxy.lastRewardBlock) {
             return 0;
         }
-        require(
-            proxy.lastRewardBlock <= block.number,
-            "BSTMinter: must little than the current block number"
-        );
         uint256 _lastRewardBlock = proxy.lastRewardBlock;
         uint256 blockReward = 0;
-        uint256 _lastPhase = phase(_lastRewardBlock);
-        uint256 _currPhase = phase(block.number);
+        uint256 _lastPhase = _phase(_lastRewardBlock);
+        uint256 _currPhase = _phase(block.number);
         uint256 _bstPerBlock = tokenPerBlock;
-        uint256 i = 0;
+        uint256 i = 1;
         while (i <= _lastPhase) {
             _bstPerBlock = _bstPerBlock.mul(10**18).div(HALVING_COEFFICIENT);
             i++;
@@ -162,7 +158,7 @@ contract BSTMinter is Ownable {
     /// @notice Update reward vairables for all proxys. Be careful of gas spending!
     function massMint() public {
         uint256 length = proxyAddresses.length;
-        for (uint256 pid = 0; pid < length; ++pid) {
+        for (uint256 pid = 0; pid < length; pid++) {
             mint(proxyAddresses[pid], 1, 1);
         }
     }
@@ -182,8 +178,8 @@ contract BSTMinter is Ownable {
         }
         uint256 tokenReward =
             getReward(_pid).mul(_allocPoint).div(_totalAllocPoint);
-        token.mint(devaddr, tokenReward.div(10));
-        token.mint(proxy.farmingProxy, tokenReward);
+        bstToken.mint(devaddr, tokenReward.div(10));
+        bstToken.mint(proxy.farmingProxy, tokenReward);
         proxy.lastRewardBlock = block.number;
         return tokenReward;
     }
@@ -194,7 +190,7 @@ contract BSTMinter is Ownable {
     }
 
     function getTokenAddress() external view returns (address) {
-        return address(token);
+        return address(bstToken);
     }
 
     function getStartBlock() external view returns (uint256) {
