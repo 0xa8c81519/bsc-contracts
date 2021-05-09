@@ -34,7 +34,7 @@ contract BSTMinter is Ownable {
     /// @notice The block number when BST mining starts.
     uint256 startBlock;
     /// @notice Halving Period in blocks.
-    uint256 public halvingPeriod = 7200;
+    uint256 public halvingPeriod = 2_628_000;
     /// @notice Halving coefficient.
     uint256 public HALVING_COEFFICIENT = 1_189_207_115_002_721_024;
 
